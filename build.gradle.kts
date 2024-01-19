@@ -24,6 +24,9 @@ repositories {
 dependencies {
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	annotationProcessor("org.mapstruct:mapstruct:1.5.5.Final")
+	implementation("jakarta.persistence:jakarta.persistence-api:3.2.0-M1")
+	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0-M1")
+	implementation("jakarta.validation:jakarta.validation-api:3.1.0-M1")
 	implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
