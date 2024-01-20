@@ -14,4 +14,6 @@ public interface ItemMapper {
     TaskDto toItem(Task item);
 
     Task toTaskDto(TaskDto taskDto);
+
+    // todo: прикрутить default методы для запихивания вложенных списков в объекты
 }

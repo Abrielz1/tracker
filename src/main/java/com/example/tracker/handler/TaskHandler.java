@@ -14,7 +14,7 @@ import java.net.URI;
 @Component
 public class TaskHandler {
 
-    public Mono<ServerResponse> getAllItem(ServerRequest serverRequest) {
+    public Mono<ServerResponse> getAllItem(ServerRequest serverRequest) { // todo: прикрутить список тасков из бд
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -22,7 +22,7 @@ public class TaskHandler {
                         TaskDto.class);
     }
 
-    public Mono<ServerResponse> getById(ServerRequest serverRequest) {
+    public Mono<ServerResponse> getById(ServerRequest serverRequest) { // todo: прикрутить таск из бд по id
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -30,7 +30,7 @@ public class TaskHandler {
                         TaskDto.class);
     }
 
-    public Mono<ServerResponse> create(ServerRequest serverRequest) {
+    public Mono<ServerResponse> create(ServerRequest serverRequest) { // todo: прикрутить создание таски в бд
 
         return serverRequest.bodyToMono(TaskDto.class)
                 .flatMap(item -> {
@@ -40,6 +40,9 @@ public class TaskHandler {
                 .flatMap(item -> ServerResponse.created(URI.create("/api/v1/functional/item/" + item.getId())).build());
 
     }
+
+    // todo: создать обновление таски в бд
+    // todo: создать удаление таски из бд
 
     public Mono<ServerResponse> errorRequest(ServerRequest serverRequest) {
 

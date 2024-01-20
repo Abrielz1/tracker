@@ -1,16 +1,21 @@
 package com.example.tracker.controller;
 
 import com.example.tracker.dto.TaskDto;
+import com.example.tracker.publisher.TaskUpdatesPublisher;
 import com.example.tracker.service.TaskService;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
@@ -21,6 +26,8 @@ import java.time.LocalDateTime;
 public class TaskController {
 
     private final TaskService service;
+
+    private final TaskUpdatesPublisher publisher;
 
     // TODO: найти все задачи
     //  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
@@ -43,5 +50,12 @@ public class TaskController {
 
         log.info("Task with id: {} was removed via controller at" + " time: " + LocalDateTime.now(), id);
         return service.removeById(id);
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<TaskDto>> getTaskUpdatesStream() {
+
+        log.info("");
+        return publisher.getUpdateSink().asFlux().map(task -> ServerSentEvent.builder(task).build());
     }
 }

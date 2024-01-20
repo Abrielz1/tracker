@@ -16,9 +16,9 @@ public class TaskRouter {
     public RouterFunction<ServerResponse> itemResponse(TaskHandler taskHandler) {
 
         return RouterFunctions.route()
-                .GET("/api/v1/functional/item", taskHandler::getAllItem)
-                .GET("/api/v1/functional/item/{id}", taskHandler::getById)
-                .POST("/api/v1/functional/item", taskHandler::create)
+                .GET("/api/v1/functional/task", taskHandler::getAllItem)
+                .GET("/api/v1/functional/task/{id}", taskHandler::getById)
+                .POST("/api/v1/functional/task", taskHandler::create)
                 .GET("/api/v1/functional/error", taskHandler::errorRequest)
                 .build();
 
