@@ -7,13 +7,13 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ItemMapper {
+public interface TaskMapper {
 
-    ItemMapper ITEM_MAPPER = Mappers.getMapper(ItemMapper.class);
+    TaskMapper TASK_MAPPER = Mappers.getMapper(TaskMapper.class);
 
-    TaskDto toItem(Task item);
+    Task toTask(TaskDto taskDto);
 
-    Task toTaskDto(TaskDto taskDto);
+    TaskDto toTaskDto(Task task);
 
-    // todo: прикрутить default методы для запихивания вложенных списков в объекты
+    //todo: прикрутить default методы для запихивания вложенных списков в объекты
 }

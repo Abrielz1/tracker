@@ -1,5 +1,7 @@
 package com.example.tracker.controller;
 
+import com.example.tracker.Create;
+import com.example.tracker.Update;
 import com.example.tracker.dto.TaskDto;
 import com.example.tracker.publisher.TaskUpdatesPublisher;
 import com.example.tracker.service.TaskService;
@@ -9,15 +11,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -29,20 +37,41 @@ public class TaskController {
 
     private final TaskUpdatesPublisher publisher;
 
-    // TODO: найти все задачи
-    //  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-    //  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+    @GetMapping()
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<TaskDto> getAll() {
 
-    // TODO: найти конкретную задачу по Id
-    //  (в ответе также должны находиться вложенные сущности,
-    //  которые описывают автора задачи и исполнителя,
-    //  а также содержат список наблюдающих за задачей) @GetMapping("{/id}") getById(@Positive @PathVariable String id)
+        log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
+        return service.getAll();
+    }
 
-    // TODO:создать задачу @PostMapping() Create.class create(@Validated(Create.class) @RequestBody User user, @Validated(Create.class) @RequestBody  TaskDto taskDto)
+    @GetMapping("{/id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<TaskDto> getById(@NotBlank @PathVariable String id) {
 
-    // TODO: обновить информацию о пользователе @PutMapping("{/id}") (@Positive @PathVariable String id, @Validated(Update.class) @RequestBody @RequestBody User user, @Validated(Update.class) @RequestBody TaskDto taskDto)
+        log.info("Task with id: {} was sent via controller at" + " time: " + LocalDateTime.now(), id);
+        return service.getById(id);
+    }
 
-    // TODO: добавить наблюдателя в задачу;
+    @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<TaskDto> create(@Validated(Create.class) @RequestBody TaskDto taskDto) {
+
+        taskDto.setId(UUID.randomUUID().toString());
+        log.info("Task was created and id: {} was st via controller at" + " time: " + LocalDateTime.now(), taskDto.getId());
+        return service.create(taskDto);
+    }
+
+    @PutMapping("{/id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<TaskDto> update(@NotBlank @PathVariable String id,
+                                @NotBlank @RequestParam String userId,
+                                @Validated(Update.class) @RequestBody TaskDto taskDto) {
+
+        log.info("Task with id: {} and with userId: {}" +
+                " was updated via controller at" + " time: " + LocalDateTime.now(), id, userId);
+        return service.update(id, userId, taskDto);
+    }
 
     @DeleteMapping("{/id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -55,7 +84,11 @@ public class TaskController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<TaskDto>> getTaskUpdatesStream() {
 
-        log.info("");
-        return publisher.getUpdateSink().asFlux().map(task -> ServerSentEvent.builder(task).build());
+        log.info("Task were sent via controoler by stream");
+        return publisher.getUpdateSink()
+                .asFlux()
+                .map(task -> ServerSentEvent
+                        .builder(task)
+                        .build());
     }
 }
