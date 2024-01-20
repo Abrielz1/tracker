@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/") // TODO: придумать
+@RequestMapping("/task-tracker/tasks")
 @AllArgsConstructor
 public class TaskController {
 

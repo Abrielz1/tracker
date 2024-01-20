@@ -28,7 +28,7 @@ import java.util.UUID;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/task-tracker/users")
 @AllArgsConstructor
 public class UserController {
 
