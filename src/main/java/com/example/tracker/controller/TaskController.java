@@ -73,6 +73,16 @@ public class TaskController {
         return service.update(id, userId, taskDto);
     }
 
+    @PutMapping("{/id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<TaskDto> addAssignee(@NotBlank @PathVariable String id,
+                                     @NotBlank @RequestParam String assigneeId,
+                                     @Validated(Update.class) @RequestBody TaskDto taskDto) {
+        log.info("Task with id: {} and with assigneeId: {}" +
+                " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
+        return service.addAssignee(id, assigneeId, taskDto);
+    }
+
     @DeleteMapping("{/id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> removeById(@NotBlank @PathVariable String id) {
@@ -84,11 +94,11 @@ public class TaskController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<TaskDto>> getTaskUpdatesStream() {
 
-        log.info("Task were sent via controoler by stream");
+        log.info("Task were sent via controller by stream");
         return publisher.getUpdateSink()
                 .asFlux()
                 .map(task -> ServerSentEvent
-                        .builder(task)
-                        .build());
+                .builder(task)
+                .build());
     }
 }

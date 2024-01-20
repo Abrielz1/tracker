@@ -105,6 +105,23 @@ public class TaskService {
         return repository.save(TASK_MAPPER.toTask(taskDto)).map(TASK_MAPPER::toTaskDto);
     }
 
+    public Mono<TaskDto> addAssignee(String id, String assigneeId, TaskDto taskDto) {
+
+        Task task = repository.findById(id).block();
+        User user = userRepository.findById(assigneeId).block();
+
+        log.info("Task with id: {} and with assigneeId: {}" +
+                " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
+
+        if (StringUtils.hasText(taskDto.getAssigneeId())) { // TODO: проверить тз
+            if (task != null) {
+                task.setAssigneeId(taskDto.getAssigneeId());
+            }
+        }
+
+        return repository.save(TASK_MAPPER.toTask(taskDto)).map(TASK_MAPPER::toTaskDto);
+    }
+
     public Mono<Void> removeById(String id) {
 
         log.info("Task with id: {} was removed via service at" + " time: " + LocalDateTime.now(), id);
