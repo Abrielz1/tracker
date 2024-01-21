@@ -48,7 +48,8 @@ public class TaskService {
     public Mono<TaskDto> create(TaskDto taskDto) {
 
         log.info("Task was created via service at" + " time: " + LocalDateTime.now());
-        return repository.save(TASK_MAPPER.toTask(taskDto)).map(TASK_MAPPER::toTaskDto);
+        Task task = repository.save(TASK_MAPPER.toTask(taskDto)).block();
+        return Mono.just(TASK_MAPPER.toTaskDto(task));
     }
 
     public Mono<TaskDto> update(String id, String userId, TaskDto taskDto) {
@@ -102,7 +103,8 @@ public class TaskService {
             }
         }
 
-        return repository.save(TASK_MAPPER.toTask(taskDto)).map(TASK_MAPPER::toTaskDto);
+        task = repository.save(TASK_MAPPER.toTask(taskDto)).block();
+        return Mono.just(TASK_MAPPER.toTaskDto(task));
     }
 
     public Mono<TaskDto> addAssignee(String id, String assigneeId, TaskDto taskDto) {
@@ -113,13 +115,14 @@ public class TaskService {
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
 
-        if (StringUtils.hasText(taskDto.getAssigneeId())) { // TODO: проверить тз
+        if (StringUtils.hasText(taskDto.getAssigneeId())) {
             if (task != null) {
                 task.setAssigneeId(taskDto.getAssigneeId());
             }
         }
 
-        return repository.save(TASK_MAPPER.toTask(taskDto)).map(TASK_MAPPER::toTaskDto);
+        task = repository.save(TASK_MAPPER.toTask(taskDto)).block();
+        return Mono.just(TASK_MAPPER.toTaskDto(task));
     }
 
     public Mono<Void> removeById(String id) {
