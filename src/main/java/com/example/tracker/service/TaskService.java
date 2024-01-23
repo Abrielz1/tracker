@@ -13,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
 
 @Slf4j
@@ -24,14 +25,26 @@ public class TaskService {
 
     private final UserRepository userRepository;
 
-    // TODO: найти все задачи
-    //  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-    //  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
-
     public Flux<TaskDto> getAll() {
 
         log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
-        return null;
+        Flux<Task> taskFlux = repository.findAll();
+        Flux<User> userFlux = userRepository.findAll();
+        Flux<User> userFluxObserver = userRepository.findAll();
+
+        return Flux.zip(taskFlux, userFlux).flatMap(tuple -> Flux.just(new TaskDto(
+                tuple.getT1().getId(),
+                tuple.getT1().getName(),
+                tuple.getT1().getDescription(),
+                tuple.getT1().getCreatedAt(),
+                tuple.getT1().getUpdatedAt(),
+                tuple.getT1().getStatus(),
+                tuple.getT1().getAuthorId(),
+                tuple.getT1().getAssigneeId(),
+                tuple.getT1().getObserverIds(),
+                tuple.getT2(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                tuple.getT2(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                new HashSet<>())));
     }
 
     // TODO: найти конкретную задачу по Id
@@ -42,7 +55,25 @@ public class TaskService {
     public Mono<TaskDto> getById(String id) {
 
         log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
-        return null;
+        Mono<Task> taskMono = repository.findById(id);
+        Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
+        Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
+
+        return         Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
+                tuple -> new TaskDto(
+                        tuple.getT1().getId(),
+                        tuple.getT1().getName(),
+                        tuple.getT1().getDescription(),
+                        tuple.getT1().getCreatedAt(),
+                        tuple.getT1().getUpdatedAt(),
+                        tuple.getT1().getStatus(),
+                        tuple.getT1().getAuthorId(),
+                        tuple.getT1().getAssigneeId(),
+                        tuple.getT1().getObserverIds(),
+                        tuple.getT2(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                        tuple.getT3(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                        new HashSet<>())
+        );
     }
 
     public Mono<TaskDto> create(TaskDto taskDto) {
