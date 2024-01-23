@@ -13,7 +13,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+
 import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
 
 @Slf4j
@@ -30,7 +33,16 @@ public class TaskService {
         log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
         Flux<Task> taskFlux = repository.findAll();
         Flux<User> userFlux = userRepository.findAll();
-        Flux<User> userFluxObserver = userRepository.findAll();
+        List<User> userFluxObserver = (List<User>) userRepository.findAll();
+        List<Task> taskList = (List<Task>) repository.findAll();
+        List<User> result = new ArrayList<>();
+        for (int i = 0; i < taskList.size(); i++) {
+           Task t = taskList.get(i);
+          List<String> strings= (List<String>) t.getObserverIds();
+            for (String s : strings) {
+                result.add(userFluxObserver.get(Integer.parseInt(s)));
+            }
+        }
 
         return Flux.zip(taskFlux, userFlux).flatMap(tuple -> Flux.just(new TaskDto(
                 tuple.getT1().getId(),
@@ -44,7 +56,7 @@ public class TaskService {
                 tuple.getT1().getObserverIds(),
                 tuple.getT2(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
                 tuple.getT2(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
-                new HashSet<>())));
+                new HashSet<>(result))));
     }
 
     // TODO: найти конкретную задачу по Id
