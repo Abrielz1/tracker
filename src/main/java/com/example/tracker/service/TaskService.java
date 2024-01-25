@@ -1,6 +1,8 @@
 package com.example.tracker.service;
 
 import com.example.tracker.dto.TaskDto;
+import com.example.tracker.dto.UserDto;
+import com.example.tracker.mapper.UserMapper;
 import com.example.tracker.model.Task;
 import com.example.tracker.model.User;
 import com.example.tracker.repository.TaskRepository;
@@ -14,10 +16,12 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
+import static com.example.tracker.mapper.UserMapper.USER_MAPPER;
 
 @Slf4j
 @Service
@@ -33,18 +37,18 @@ public class TaskService {
         log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
         Flux<Task> taskFlux = repository.findAll();
         Flux<User> userFlux = userRepository.findAll();
-        List<User> userFluxObserver = (List<User>) userRepository.findAll();
-        List<Task> taskList = (List<Task>) repository.findAll();
-        List<User> result = new ArrayList<>();
-        for (int i = 0; i < taskList.size(); i++) {
-           Task t = taskList.get(i);
-          List<String> strings= (List<String>) t.getObserverIds();
-            for (String s : strings) {
-                result.add(userFluxObserver.get(Integer.parseInt(s)));
-            }
-        }
-
-        return Flux.zip(taskFlux, userFlux).flatMap(tuple -> Flux.just(new TaskDto(
+//        List<User> userFluxObserver = (List<User>) userRepository.findAll();
+//        List<Task> taskList = (List<Task>) repository.findAll();
+//        List<User> result = new ArrayList<>();
+//        for (int i = 0; i < taskList.size(); i++) {
+//           Task t = taskList.get(i);
+//          List<String> strings= (List<String>) t.getObserverIds();
+//            for (String s : strings) {
+//                result.add(userFluxObserver.get(Integer.parseInt(s)));
+//            }
+//        }
+   // Mono<User> observer = userRepository.findById().block();
+        return Flux.zip(taskFlux, userFlux, userAssignee()).flatMap(tuple -> Flux.just(new TaskDto(
                 tuple.getT1().getId(),
                 tuple.getT1().getName(),
                 tuple.getT1().getDescription(),
@@ -56,7 +60,7 @@ public class TaskService {
                 tuple.getT1().getObserverIds(),
                 tuple.getT2(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
                 tuple.getT2(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
-                new HashSet<>(result))));
+                new HashSet<>((Collection) tuple.getT3()))));
     }
 
     // TODO: найти конкретную задачу по Id
@@ -70,8 +74,9 @@ public class TaskService {
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
         Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
+       // List<UserDto> observers = (List<User>) userAssignee();
 
-        return         Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
+        return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
                         tuple.getT1().getId(),
                         tuple.getT1().getName(),
@@ -172,5 +177,24 @@ public class TaskService {
 
         log.info("Task with id: {} was removed via service at" + " time: " + LocalDateTime.now(), id);
         return repository.deleteById(id);
+    }
+
+    private Flux<User> userAssignee() {
+        Flux<Task> tasks = repository.findAll();
+        Flux<User> userAssignee = tasks.flatMap( x -> userRepository.findById( x.getAssigneeId() ) );
+        Flux<List<User>> userObObserver = tasks.flatMap( user -> {
+            Set<Mono<User>> monoset = new HashSet<>();
+            for ( String observId : user.getObserverIds() ) {
+                monoset.add( userRepository.findById( observId ) );
+            }
+
+            Flux merged = Flux.empty();
+            for ( Mono out : monoset ) {
+                merged = merged.mergeWith(out);
+            }
+            return merged.collectList();
+        });
+
+        return userAssignee;
     }
 }
