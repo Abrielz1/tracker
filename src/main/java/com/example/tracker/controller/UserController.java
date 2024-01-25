@@ -41,7 +41,7 @@ public class UserController {
         return service.getAll();
     }
 
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<UserDto> getById(@NotBlank @PathVariable String id) {
 
@@ -58,7 +58,7 @@ public class UserController {
         return service.create(userDto);
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<UserDto> update(@NotBlank @PathVariable String id, @NotNull @Validated(Update.class) @RequestBody UserDto userDto) {
 
@@ -66,7 +66,7 @@ public class UserController {
         return service.update(id, userDto);
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> removeById(@NotBlank @PathVariable String id) {
 

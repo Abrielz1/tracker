@@ -73,7 +73,7 @@ public class TaskController {
         return service.update(id, userId, taskDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/addAssignee/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<TaskDto> addAssignee(@NotBlank @PathVariable String id,
                                      @NotBlank @RequestParam String assigneeId,
