@@ -1,7 +1,6 @@
 package com.example.tracker.dto;
 
 import com.example.tracker.enums.TaskStatus;
-import com.example.tracker.model.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -45,11 +44,11 @@ public class TaskDto {
     private Set<String> observerIds = new HashSet<>();
 
     @ReadOnlyProperty
-    private User author;
+    private UserDto author;
 
     @ReadOnlyProperty
-    private User assignee;
+    private UserDto assignee;
 
     @ReadOnlyProperty
-    private Set<User> observers = new HashSet<>();
+    private Set<UserDto> observers = new HashSet<>();
 }

@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
 import static com.example.tracker.mapper.UserMapper.USER_MAPPER;
 
@@ -48,7 +50,11 @@ public class TaskService {
 //            }
 //        }
    // Mono<User> observer = userRepository.findById().block();
-        return Flux.zip(taskFlux, userFlux, userAssignee()).flatMap(tuple -> Flux.just(new TaskDto(
+
+        List<User> userList = (List<User>) userAssignee();
+        List<UserDto> userDtoList = userList.stream().map(USER_MAPPER::toUserDto).toList();
+        Flux<UserDto> flux = (Flux<UserDto>) userDtoList;
+        return Flux.zip(taskFlux, userFlux, flux).flatMap(tuple -> Flux.just(new TaskDto(
                 tuple.getT1().getId(),
                 tuple.getT1().getName(),
                 tuple.getT1().getDescription(),
@@ -58,8 +64,8 @@ public class TaskService {
                 tuple.getT1().getAuthorId(),
                 tuple.getT1().getAssigneeId(),
                 tuple.getT1().getObserverIds(),
-                tuple.getT2(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                tuple.getT2(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                USER_MAPPER.toUserDto(tuple.getT2()), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                USER_MAPPER.toUserDto(tuple.getT2()), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
                 new HashSet<>((Collection) tuple.getT3()))));
     }
 
@@ -74,8 +80,9 @@ public class TaskService {
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
         Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
+        List<UserDto> userList = userAssigneeList().stream().map(USER_MAPPER::toUserDto).toList();
 
-        return Mono.zip(taskMono, (Mono<?>) userAssigneeList(), userMonoAuthor, userMonoAssignee).map(
+        return Mono.zip(taskMono, (Mono<?>) userList, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
                         tuple.getT1().getId(),
                         tuple.getT1().getName(),
@@ -86,10 +93,10 @@ public class TaskService {
                         tuple.getT1().getAuthorId(),
                         tuple.getT1().getAssigneeId(),
                         tuple.getT1().getObserverIds(),
-                        tuple.getT3(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                        tuple.getT4(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
-                        new HashSet<>((Collection) tuple.getT2()))
-        );
+                        USER_MAPPER.toUserDto(tuple.getT3()), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                        USER_MAPPER.toUserDto(tuple.getT4()), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                        new HashSet<>((Collection) tuple.getT2())
+        ));
     }
 
     public Mono<TaskDto> create(TaskDto taskDto) {
