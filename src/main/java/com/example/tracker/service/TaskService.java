@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
 import static com.example.tracker.mapper.UserMapper.USER_MAPPER;
 

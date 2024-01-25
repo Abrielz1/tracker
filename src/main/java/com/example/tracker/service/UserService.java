@@ -40,7 +40,8 @@ public class UserService {
     public Mono<UserDto> create(UserDto userDto) {
 
         log.info("User with id: {} was created via controller at" + " time: " + LocalDateTime.now(), userDto.getId());
-        return repository.save(USER_MAPPER.toUser(userDto)).map(USER_MAPPER::toUserDto);
+        User user = repository.save(USER_MAPPER.toUser(userDto)).block();
+        return Mono.just(USER_MAPPER.toUserDto(user));
     }
 
     public Mono<UserDto> update(String id, UserDto userDto) {
@@ -68,6 +69,7 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
 
-        return repository.save(user).map(USER_MAPPER::toUserDto);
+        user = repository.save(USER_MAPPER.toUser(userDto)).block();
+        return Mono.just(USER_MAPPER.toUserDto(user));
     }
 }
