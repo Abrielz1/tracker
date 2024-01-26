@@ -2,11 +2,11 @@ package com.example.tracker.service;
 
 import com.example.tracker.dto.TaskDto;
 import com.example.tracker.dto.UserDto;
-import com.example.tracker.mapper.UserMapper;
 import com.example.tracker.model.Task;
 import com.example.tracker.model.User;
 import com.example.tracker.repository.TaskRepository;
 import com.example.tracker.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,12 +15,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
 import static com.example.tracker.mapper.UserMapper.USER_MAPPER;
 
@@ -32,6 +30,8 @@ public class TaskService {
     private final TaskRepository repository;
 
     private final UserRepository userRepository;
+
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public Flux<TaskDto> getAll() {
 
@@ -63,8 +63,8 @@ public class TaskService {
                 tuple.getT1().getAuthorId(),
                 tuple.getT1().getAssigneeId(),
                 tuple.getT1().getObserverIds(),
-                USER_MAPPER.toUserDto(tuple.getT2()), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                USER_MAPPER.toUserDto(tuple.getT2()), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                objectMapper.convertValue((tuple.getT2()), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                objectMapper.convertValue((tuple.getT2()), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
                 new HashSet<>((Collection) tuple.getT3()))));
     }
 
@@ -79,7 +79,8 @@ public class TaskService {
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
         Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
-        List<UserDto> userList = userAssigneeList().stream().map(USER_MAPPER::toUserDto).toList();
+
+        List<UserDto> userList = userAssigneeList().stream().map(USER_MAPPER::toUserDto).toList(); //todo: найти способ конвертнуть коллекцию
 
         return Mono.zip(taskMono, (Mono<?>) userList, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
@@ -92,8 +93,8 @@ public class TaskService {
                         tuple.getT1().getAuthorId(),
                         tuple.getT1().getAssigneeId(),
                         tuple.getT1().getObserverIds(),
-                        USER_MAPPER.toUserDto(tuple.getT3()), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                        USER_MAPPER.toUserDto(tuple.getT4()), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                        objectMapper.convertValue((tuple.getT3()), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                        objectMapper.convertValue((tuple.getT4()), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
                         new HashSet<>((Collection) tuple.getT2())
         ));
     }
@@ -101,8 +102,9 @@ public class TaskService {
     public Mono<TaskDto> create(TaskDto taskDto) {
 
         log.info("Task was created via service at" + " time: " + LocalDateTime.now());
-        Task task = repository.save(TASK_MAPPER.toTask(taskDto)).block();
-        return Mono.just(TASK_MAPPER.toTaskDto(task));
+        Task task = (objectMapper.convertValue(taskDto, Task.class));
+        repository.save(task);
+        return Mono.just(objectMapper.convertValue(task, TaskDto.class));
     }
 
     public Mono<TaskDto> update(String id, String userId, TaskDto taskDto) {
@@ -156,8 +158,9 @@ public class TaskService {
             }
         }
 
-        task = repository.save(TASK_MAPPER.toTask(taskDto)).block();
-        return Mono.just(TASK_MAPPER.toTaskDto(task));
+        task = (objectMapper.convertValue(taskDto, Task.class));
+        repository.save(task);
+        return Mono.just(objectMapper.convertValue(task, TaskDto.class));
     }
 
     public Mono<TaskDto> addAssignee(String id, String assigneeId, TaskDto taskDto) {

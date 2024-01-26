@@ -20,13 +20,12 @@ public class UserService {
 
     private final UserRepository repository;
 
-
     ObjectMapper objectMapper = new ObjectMapper();
 
     public Flux<UserDto> getAll() {
 
         log.info("users were sent to controller via service at" + " time: " + LocalDateTime.now());
-        return repository.findAll().map(USER_MAPPER::toUserDto);
+        return repository.findAll().map(USER_MAPPER::toUserDto); //todo: найти способ конвертнуть список
     }
 
     public Mono<Void> removeById(String id) {
@@ -64,8 +63,8 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
 
-        user = objectMapper.convertValue(userDto, User.class);//(USER_MAPPER.toUser(userDto));
+        user = objectMapper.convertValue(userDto, User.class);
         repository.save(user);
-        return Mono.just(objectMapper.convertValue(user, UserDto.class)); //USER_MAPPER.toUserDto(user)
+        return Mono.just(objectMapper.convertValue(user, UserDto.class));
     }
 }
