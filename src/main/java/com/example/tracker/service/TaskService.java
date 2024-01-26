@@ -120,55 +120,53 @@ public class TaskService {
         log.info("Task with id: {} and with userId: {}" +
                 " was updated via service at" + " time: " + LocalDateTime.now(), id, userId);
 
-
-        Task task = repository.findById(id).block();
-        User user = userRepository.findById(userId).block();
+        return getById(id).flatMap(taskForUpdate -> {
 
         if (StringUtils.hasText(taskDto.getName())) {
-            if (task != null) { // TODO: проверить этот совет idea
-                task.setName(taskDto.getName());
+            if (taskDto != null) { // TODO: проверить этот совет idea
+                taskForUpdate.setName(taskDto.getName());
             }
         }
 
         if (StringUtils.hasText(taskDto.getDescription())) {
-            if (task != null) {
-                task.setDescription(taskDto.getDescription());
+            if (taskDto != null) {
+                taskForUpdate.setDescription(taskDto.getDescription());
             }
         }
 
         if (taskDto.getCreatedAt() != null && taskDto.getCreatedAt().isBefore(Instant.now())) {
-            if (task != null) {
-                task.setCreatedAt(taskDto.getCreatedAt());
+            if (taskDto != null) {
+                taskForUpdate.setCreatedAt(taskDto.getCreatedAt());
             }
         }
 
         if (taskDto.getUpdatedAt() != null && taskDto.getUpdatedAt().isBefore(Instant.now())) {
-            if (task != null) {
-                task.setUpdatedAt(taskDto.getUpdatedAt());
+            if (taskDto != null) {
+                taskForUpdate.setUpdatedAt(taskDto.getUpdatedAt());
             }
         }
 
         if (StringUtils.hasText(taskDto.getAssigneeId())) { // TODO: проверить тз
-            if (task != null) {
-                task.setAssigneeId(taskDto.getAssigneeId());
+            if (taskDto != null) {
+                taskForUpdate.setAssigneeId(taskDto.getAssigneeId());
             }
         }
 
         if (StringUtils.hasText(taskDto.getAuthorId())) { // TODO: проверить тз
-            if (task != null) {
-                task.setAuthorId(taskDto.getAuthorId());
+            if (taskDto != null) {
+                taskForUpdate.setAuthorId(taskDto.getAuthorId());
             }
         }
 
         if (taskDto.getStatus() != null) {
-            if (task != null) {
-                task.setStatus(taskDto.getStatus());
+            if (taskDto != null) {
+                taskForUpdate.setStatus(taskDto.getStatus());
             }
         }
 
-        task = (objectMapper.convertValue(taskDto, Task.class));
-        repository.save(task);
-        return Mono.just(objectMapper.convertValue(task, TaskDto.class));
+            repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
+            return Mono.just(objectMapper.convertValue(taskForUpdate, TaskDto.class));
+        });
     }
 
     public Mono<TaskDto> addAssignee(String id, String assigneeId, TaskDto taskDto) {
