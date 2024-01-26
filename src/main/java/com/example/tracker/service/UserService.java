@@ -27,20 +27,14 @@ public class UserService {
         log.info("users were sent to controller via service at" + " time: " + LocalDateTime.now());
         return repository.findAll().map(user ->
                         objectMapper.convertValue(user, UserDto.class));
-                        //todo: найти способ конвертнуть список
-    }
-
-    public Mono<Void> removeById(String id) {
-
-        log.info("User with id: {} was removed from db via service at" + " time: " + LocalDateTime.now(), id);
-        return repository.deleteById(id);
     }
 
     public Mono<UserDto> getById(String id) {
 
         log.info("User with id: {} was sent from db via service to controller at" + " time: " + LocalDateTime.now(), id);
-
-        return Mono.just(objectMapper.convertValue(repository.findById(id), UserDto.class));
+       // User userDto = repository.findById(id).block(); //не пашет
+        return  Mono.just(
+                objectMapper.convertValue(repository.findById(id), UserDto.class));
     }
 
     public Mono<UserDto> create(UserDto userDto) {
@@ -68,5 +62,11 @@ public class UserService {
         user = objectMapper.convertValue(userDto, User.class);
         repository.save(user);
         return Mono.just(objectMapper.convertValue(user, UserDto.class));
+    }
+
+    public Mono<Void> removeById(String id) {
+
+        log.info("User with id: {} was removed from db via service at" + " time: " + LocalDateTime.now(), id);
+        return repository.deleteById(id);
     }
 }

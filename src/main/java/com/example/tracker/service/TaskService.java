@@ -84,7 +84,10 @@ public class TaskService {
         Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
         Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
 
-        List<UserDto> userList = userAssigneeList().stream().map(USER_MAPPER::toUserDto).toList(); //todo: найти способ конвертнуть коллекцию
+        List<UserDto> userList = userAssigneeList().stream()
+                .map(user ->
+                objectMapper.convertValue(user, UserDto.class))
+                .toList();
 
         return Mono.zip(taskMono, (Mono<?>) userList, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
