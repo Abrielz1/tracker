@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/task-tracker/tasks")
+@RequestMapping("/task-tracker/tasks") // /task-tracker/users
 @AllArgsConstructor
 public class TaskController {
 
@@ -62,11 +62,11 @@ public class TaskController {
         return service.create(taskDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id}") //@PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<TaskDto> update(@NotBlank @PathVariable String id,
-                                @NotBlank @RequestParam String userId,
-                                @Validated(Update.class) @RequestBody TaskDto taskDto) {
+    public Mono<TaskDto> update(@PathVariable String id, //@NotBlank
+                                @RequestParam("userId") String userId, //@NotBlank
+                                @RequestBody TaskDto taskDto) { //@Validated(Update.class)
 
         log.info("Task with id: {} and with userId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, userId);

@@ -13,15 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
 
 @Slf4j
 @Service
@@ -37,6 +34,7 @@ public class TaskService {
     public Flux<TaskDto> getAll() {
 
         log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
+
         Flux<Task> taskFlux = repository.findAll();
         Flux<User> userFlux = userRepository.findAll();
 //        List<User> userFluxObserver = (List<User>) userRepository.findAll();
@@ -58,7 +56,9 @@ public class TaskService {
                 .toList();
 
         Flux<UserDto> flux = (Flux<UserDto>) userDtoList;
-        return Flux.zip(taskFlux, userFlux, flux).flatMap(tuple -> Flux.just(new TaskDto(
+        return Flux.zip(taskFlux, userFlux, flux).flatMap(
+                tuple -> Flux.just(
+                new TaskDto(
                 tuple.getT1().getId(),
                 tuple.getT1().getName(),
                 tuple.getT1().getDescription(),
@@ -68,9 +68,9 @@ public class TaskService {
                 tuple.getT1().getAuthorId(),
                 tuple.getT1().getAssigneeId(),
                 tuple.getT1().getObserverIds(),
-                objectMapper.convertValue((tuple.getT2()), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                objectMapper.convertValue((tuple.getT2()), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
-                new HashSet<>((Collection) tuple.getT3()))));
+                new UserDto(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                new UserDto(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                new HashSet<>())));
     }
 
     // TODO: найти конкретную задачу по Id
@@ -82,15 +82,16 @@ public class TaskService {
 
         log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
         Mono<Task> taskMono = repository.findById(id);
-        Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
-        Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
+   //     Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
+   //     Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
 
-        List<UserDto> userList = userAssigneeList().stream()
+        List<UserDto> userList = (List<UserDto>) userAssignee();
+        List<UserDto> list = userList.stream()
                 .map(user ->
                         objectMapper.convertValue(user, UserDto.class))
                 .toList();
 
-        return Mono.zip(taskMono, (Mono<?>) userList, userMonoAuthor, userMonoAssignee).map(
+        return Mono.zip(taskMono, (Mono<?>) list).map(
                 tuple -> new TaskDto(
                         tuple.getT1().getId(),
                         tuple.getT1().getName(),
@@ -101,9 +102,9 @@ public class TaskService {
                         tuple.getT1().getAuthorId(),
                         tuple.getT1().getAssigneeId(),
                         tuple.getT1().getObserverIds(),
-                        objectMapper.convertValue((tuple.getT3()), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                        objectMapper.convertValue((tuple.getT4()), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
-                        new HashSet<>((Collection) tuple.getT2())
+                        new UserDto(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                        new UserDto(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                        new HashSet<>()
                 ));
     }
 
@@ -191,24 +192,5 @@ public class TaskService {
         });
 
         return userAssignee;
-    }
-
-    private List<User> userAssigneeList() {
-        Flux<Task> tasks = repository.findAll();
-        Flux<User> userAssignee = tasks.flatMap(x -> userRepository.findById(x.getAssigneeId()));
-        Flux<List<User>> userObObserver = tasks.flatMap(user -> {
-            Set<Mono<User>> monoset = new HashSet<>();
-            for (String observId : user.getObserverIds()) {
-                monoset.add(userRepository.findById(observId));
-            }
-
-            Flux merged = Flux.empty();
-            for (Mono out : monoset) {
-                merged = merged.mergeWith(out);
-            }
-            return merged.collectList();
-        });
-
-        return (List<User>) userAssignee.collectList();
     }
 }
