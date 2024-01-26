@@ -51,7 +51,11 @@ public class TaskService {
    // Mono<User> observer = userRepository.findById().block();
 
         List<User> userList = (List<User>) userAssignee();
-        List<UserDto> userDtoList = userList.stream().map(USER_MAPPER::toUserDto).toList();
+
+        List<UserDto> userDtoList = userList.stream().map(user ->
+                objectMapper.convertValue(user, UserDto.class))
+                .toList();
+
         Flux<UserDto> flux = (Flux<UserDto>) userDtoList;
         return Flux.zip(taskFlux, userFlux, flux).flatMap(tuple -> Flux.just(new TaskDto(
                 tuple.getT1().getId(),

@@ -25,7 +25,9 @@ public class UserService {
     public Flux<UserDto> getAll() {
 
         log.info("users were sent to controller via service at" + " time: " + LocalDateTime.now());
-        return repository.findAll().map(USER_MAPPER::toUserDto); //todo: найти способ конвертнуть список
+        return repository.findAll().map(user ->
+                        objectMapper.convertValue(user, UserDto.class));
+                        //todo: найти способ конвертнуть список
     }
 
     public Mono<Void> removeById(String id) {
