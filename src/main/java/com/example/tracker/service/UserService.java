@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
-import static com.example.tracker.mapper.UserMapper.USER_MAPPER;
 
 @Slf4j
 @Service
@@ -47,21 +46,21 @@ public class UserService {
 
     public Mono<UserDto> update(String id, UserDto userDto) {
 
-        log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
+       log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
 
-        User user = repository.findById(id).block();
+        return getById(id).flatMap(userForUpdate -> {
 
-        if (StringUtils.hasText(userDto.getUsername())) { //not null and not blanc
-            user.setUsername((userDto.getUsername()));
-        }
+            if (StringUtils.hasText(userDto.getUsername())) { //not null and not blanc
+                userForUpdate.setUsername(userDto.getUsername());
+            }
 
-        if (StringUtils.hasText(userDto.getEmail())) {
-            user.setEmail(userDto.getEmail());
-        }
+            if (StringUtils.hasText(userDto.getEmail())) { //not null and not blanc
+                userForUpdate.setEmail(userDto.getEmail());
+            }
 
-        user = objectMapper.convertValue(userDto, User.class);
-        repository.save(user);
-        return Mono.just(objectMapper.convertValue(user, UserDto.class));
+            repository.save(objectMapper.convertValue(userForUpdate, User.class));
+            return Mono.just(objectMapper.convertValue(userForUpdate, UserDto.class));
+        });
     }
 
     public Mono<Void> removeById(String id) {
