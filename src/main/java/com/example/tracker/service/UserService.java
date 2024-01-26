@@ -38,32 +38,22 @@ public class UserService {
     public Mono<UserDto> getById(String id) {
 
         log.info("User with id: {} was sent from db via service to controller at" + " time: " + LocalDateTime.now(), id);
-        return repository.findById(id).map(USER_MAPPER::toUserDto);
+
+        return Mono.just(objectMapper.convertValue(repository.findById(id), UserDto.class));
     }
 
     public Mono<UserDto> create(UserDto userDto) {
 
         log.info("User with id: {} was created via controller at" + " time: " + LocalDateTime.now(), userDto.getId());
-        User user = objectMapper.convertValue(userDto, User.class);//(USER_MAPPER.toUser(userDto));
-        user = repository.save(user).block();
-        return Mono.just(objectMapper.convertValue(user, UserDto.class)); //USER_MAPPER.toUserDto(user)
+        User user = objectMapper.convertValue(userDto, User.class);
+        repository.save(user);
+        return Mono.just(objectMapper.convertValue(user, UserDto.class));
     }
 
     public Mono<UserDto> update(String id, UserDto userDto) {
 
         log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
-//        return getById(id).flatMap(itemForUpdate -> {
-//
-//            if (StringUtils.hasText(userDto.getUsername())) { //not null and not blanc
-//                itemForUpdate.setUsername((userDto.getUsername()));
-//            }
-//
-//            if (StringUtils.hasText(userDto.getEmail())) {
-//                itemForUpdate.setEmail(userDto.getEmail());
-//            }
-//
-//            return repository.save(itemForUpdate); //выдаёт ошибку
-//        });
+
         User user = repository.findById(id).block();
 
         if (StringUtils.hasText(userDto.getUsername())) { //not null and not blanc
@@ -74,7 +64,8 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
 
-        user = repository.save(USER_MAPPER.toUser(userDto)).block();
-        return Mono.just(USER_MAPPER.toUserDto(user));
+        user = objectMapper.convertValue(userDto, User.class);//(USER_MAPPER.toUser(userDto));
+        repository.save(user);
+        return Mono.just(objectMapper.convertValue(user, UserDto.class)); //USER_MAPPER.toUserDto(user)
     }
 }
