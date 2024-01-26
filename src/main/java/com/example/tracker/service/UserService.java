@@ -31,9 +31,7 @@ public class UserService {
     public Mono<UserDto> getById(String id) {
 
         log.info("User with id: {} was sent from db via service to controller at" + " time: " + LocalDateTime.now(), id);
-       // User userDto = repository.findById(id).block(); //не пашет
-        return  Mono.just(
-                objectMapper.convertValue(repository.findById(id), UserDto.class));
+        return repository.findById(id).map(user -> objectMapper.convertValue(user, UserDto.class));
     }
 
     public Mono<UserDto> create(UserDto userDto) {
@@ -47,7 +45,6 @@ public class UserService {
     public Mono<UserDto> update(String id, UserDto userDto) {
 
        log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
-
         return getById(id).flatMap(userForUpdate -> {
 
             if (StringUtils.hasText(userDto.getUsername())) { //not null and not blanc
