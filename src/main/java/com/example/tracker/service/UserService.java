@@ -3,6 +3,7 @@ package com.example.tracker.service;
 import com.example.tracker.dto.UserDto;
 import com.example.tracker.model.User;
 import com.example.tracker.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,9 @@ import static com.example.tracker.mapper.UserMapper.USER_MAPPER;
 public class UserService {
 
     private final UserRepository repository;
+
+
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public Flux<UserDto> getAll() {
 
@@ -40,8 +44,9 @@ public class UserService {
     public Mono<UserDto> create(UserDto userDto) {
 
         log.info("User with id: {} was created via controller at" + " time: " + LocalDateTime.now(), userDto.getId());
-        User user = repository.save(USER_MAPPER.toUser(userDto)).block();
-        return Mono.just(USER_MAPPER.toUserDto(user));
+        User user = objectMapper.convertValue(userDto, User.class);//(USER_MAPPER.toUser(userDto));
+        user = repository.save(user).block();
+        return Mono.just(objectMapper.convertValue(user, UserDto.class)); //USER_MAPPER.toUserDto(user)
     }
 
     public Mono<UserDto> update(String id, UserDto userDto) {
