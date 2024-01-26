@@ -110,6 +110,7 @@ public class TaskService {
     public Mono<TaskDto> create(TaskDto taskDto) {
 
         log.info("Task was created via service at" + " time: " + LocalDateTime.now());
+        taskDto.setCreatedAt(Instant.now());
         Task task = (objectMapper.convertValue(taskDto, Task.class));
         repository.save(task);
         return Mono.just(objectMapper.convertValue(task, TaskDto.class));
@@ -122,47 +123,29 @@ public class TaskService {
 
         return getById(id).flatMap(taskForUpdate -> {
 
-        if (StringUtils.hasText(taskDto.getName())) {
-            if (taskDto != null) { // TODO: проверить этот совет idea
+            if (StringUtils.hasText(taskDto.getName())) {
                 taskForUpdate.setName(taskDto.getName());
             }
-        }
 
-        if (StringUtils.hasText(taskDto.getDescription())) {
-            if (taskDto != null) {
+            if (StringUtils.hasText(taskDto.getDescription())) {
                 taskForUpdate.setDescription(taskDto.getDescription());
             }
-        }
 
-        if (taskDto.getCreatedAt() != null && taskDto.getCreatedAt().isBefore(Instant.now())) {
-            if (taskDto != null) {
-                taskForUpdate.setCreatedAt(taskDto.getCreatedAt());
-            }
-        }
+            taskForUpdate.setUpdatedAt(Instant.now());
 
-        if (taskDto.getUpdatedAt() != null && taskDto.getUpdatedAt().isBefore(Instant.now())) {
-            if (taskDto != null) {
-                taskForUpdate.setUpdatedAt(taskDto.getUpdatedAt());
-            }
-        }
-
-        if (StringUtils.hasText(taskDto.getAssigneeId())) { // TODO: проверить тз
-            if (taskDto != null) {
+            if (StringUtils.hasText(taskDto.getAssigneeId())) { // TODO: проверить тз
                 taskForUpdate.setAssigneeId(taskDto.getAssigneeId());
             }
-        }
 
-        if (StringUtils.hasText(taskDto.getAuthorId())) { // TODO: проверить тз
-            if (taskDto != null) {
+            if (StringUtils.hasText(taskDto.getAuthorId())) { // TODO: проверить тз
                 taskForUpdate.setAuthorId(taskDto.getAuthorId());
-            }
-        }
 
-        if (taskDto.getStatus() != null) {
-            if (taskDto != null) {
-                taskForUpdate.setStatus(taskDto.getStatus());
             }
-        }
+
+            if (taskDto.getStatus() != null) {
+                taskForUpdate.setStatus(taskDto.getStatus());
+
+            }
 
             repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
             return Mono.just(objectMapper.convertValue(taskForUpdate, TaskDto.class));
