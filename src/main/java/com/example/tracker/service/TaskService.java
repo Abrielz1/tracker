@@ -9,12 +9,14 @@ import com.example.tracker.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -49,14 +51,14 @@ public class TaskService {
 //        }
         // Mono<User> observer = userRepository.findById().block();
 
-        List<User> userList = (List<User>) userAssignee();
+//        List<User> userList = (List<User>) userAssignee();
+//
+//        List<UserDto> userDtoList = userList.stream().map(user ->
+//                        objectMapper.convertValue(user, UserDto.class))
+//                .toList();
 
-        List<UserDto> userDtoList = userList.stream().map(user ->
-                        objectMapper.convertValue(user, UserDto.class))
-                .toList();
-
-        Flux<UserDto> flux = (Flux<UserDto>) userDtoList;
-        return Flux.zip(taskFlux, userFlux, flux).flatMap(
+//        Flux<UserDto> flux = (Flux<UserDto>) userDtoList;
+        return Flux.zip(taskFlux, userFlux).flatMap(
                 tuple -> Flux.just(
                 new TaskDto(
                 tuple.getT1().getId(),
@@ -68,8 +70,8 @@ public class TaskService {
                 tuple.getT1().getAuthorId(),
                 tuple.getT1().getAssigneeId(),
                 tuple.getT1().getObserverIds(),
-                new UserDto(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                new UserDto(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                objectMapper.convertValue(tuple.getT2(), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                objectMapper.convertValue(userRepository.findById(tuple.getT1().getObserverIds().toString()), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
                 new HashSet<>())));
     }
 
@@ -82,16 +84,16 @@ public class TaskService {
 
         log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
         Mono<Task> taskMono = repository.findById(id);
-   //     Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
-   //     Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
+        Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
+        Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
 
-        List<UserDto> userList = (List<UserDto>) userAssignee();
-        List<UserDto> list = userList.stream()
-                .map(user ->
-                        objectMapper.convertValue(user, UserDto.class))
-                .toList();
+//        List<UserDto> userList = (List<UserDto>) userAssignee();
+//        List<UserDto> list = userList.stream()
+//                .map(user ->
+//                        objectMapper.convertValue(user, UserDto.class))
+//                .toList();
 
-        return Mono.zip(taskMono, (Mono<?>) list).map(
+        return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
                         tuple.getT1().getId(),
                         tuple.getT1().getName(),
@@ -108,16 +110,16 @@ public class TaskService {
                 ));
     }
 
-    public Mono<TaskDto> create(TaskDto taskDto) {
+    public Mono<Task> create(TaskDto taskDto) {
 
         log.info("Task was created via service at" + " time: " + LocalDateTime.now());
         taskDto.setCreatedAt(Instant.now());
         Task task = (objectMapper.convertValue(taskDto, Task.class));
         repository.save(task);
-        return Mono.just(objectMapper.convertValue(task, TaskDto.class));
+        return repository.save(task);
     }
 
-    public Mono<TaskDto> update(String id, String userId, TaskDto taskDto) {
+    public Mono<Task> update(String id, String userId, TaskDto taskDto) {
 
         log.info("Task with id: {} and with userId: {}" +
                 " was updated via service at" + " time: " + LocalDateTime.now(), id, userId);
@@ -145,11 +147,10 @@ public class TaskService {
 
             if (taskDto.getStatus() != null) {
                 taskForUpdate.setStatus(taskDto.getStatus());
-
             }
 
-            repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
-            return Mono.just(objectMapper.convertValue(taskForUpdate, TaskDto.class));
+          return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
+           // return Mono.just(objectMapper.convertValue(taskForUpdate, TaskDto.class));
         });
     }
 

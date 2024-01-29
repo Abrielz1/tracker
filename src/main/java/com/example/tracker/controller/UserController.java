@@ -51,7 +51,7 @@ public class UserController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<User> create(@NotNull @Validated(Create.class) @RequestBody User userDto) {
+    public Mono<User> create(@NotNull @Validated(Create.class) @RequestBody UserDto userDto) {
 
       //  userDto.setId(UUID.randomUUID().toString());
         log.info("User with id: {} was created via controller at" + " time: " + LocalDateTime.now(), userDto.getId());

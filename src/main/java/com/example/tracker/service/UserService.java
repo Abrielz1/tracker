@@ -35,15 +35,16 @@ public class UserService {
         return repository.findById(id).map(user -> objectMapper.convertValue(user, UserDto.class));
     }
 
-    public Mono<User> create(User userDto) {
+    public Mono<User> create(UserDto userDto) {
 
         log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
-      //  User user = objectMapper.convertValue(userDto, User.class);
+        userDto.setId(UUID.randomUUID().toString());
+        User user = objectMapper.convertValue(userDto, User.class);
 //        repository.save(userDto);
-       userDto.setId(UUID.randomUUID().toString());
+
         //return Mono.just(objectMapper.convertValue(user, UserDto.class));
 
-        return repository.save(userDto);
+        return repository.save(user);
     }
 
     public Mono<UserDto> update(String id, UserDto userDto) {

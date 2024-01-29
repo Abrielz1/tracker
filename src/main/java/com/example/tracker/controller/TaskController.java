@@ -3,6 +3,7 @@ package com.example.tracker.controller;
 import com.example.tracker.Create;
 import com.example.tracker.Update;
 import com.example.tracker.dto.TaskDto;
+import com.example.tracker.model.Task;
 import com.example.tracker.publisher.TaskUpdatesPublisher;
 import com.example.tracker.service.TaskService;
 import jakarta.validation.constraints.NotBlank;
@@ -47,7 +48,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<TaskDto> getById(@NotBlank @PathVariable String id) {
+    public Mono<TaskDto> getById(@PathVariable String id) { //@NotBlank @NotBlank
 
         log.info("Task with id: {} was sent via controller at" + " time: " + LocalDateTime.now(), id);
         return service.getById(id);
@@ -55,7 +56,7 @@ public class TaskController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<TaskDto> create(@Validated(Create.class) @RequestBody TaskDto taskDto) {
+    public Mono<Task> create(@Validated(Create.class) @RequestBody TaskDto taskDto) {
 
         taskDto.setId(UUID.randomUUID().toString());
         log.info("Task was created and id: {} was st via controller at" + " time: " + LocalDateTime.now(), taskDto.getId());
@@ -64,7 +65,7 @@ public class TaskController {
 
     @PutMapping("/{id}") //@PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<TaskDto> update(@PathVariable String id, //@NotBlank
+    public Mono<Task> update(@PathVariable String id, //@NotBlank
                                 @RequestParam("userId") String userId, //@NotBlank
                                 @RequestBody TaskDto taskDto) { //@Validated(Update.class)
 
