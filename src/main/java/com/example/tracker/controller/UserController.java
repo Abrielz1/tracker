@@ -3,6 +3,7 @@ package com.example.tracker.controller;
 import com.example.tracker.Create;
 import com.example.tracker.Update;
 import com.example.tracker.dto.UserDto;
+import com.example.tracker.model.User;
 import com.example.tracker.service.UserService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,9 +51,9 @@ public class UserController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<UserDto> create(@NotNull @Validated(Create.class) @RequestBody UserDto userDto) {
+    public Mono<User> create(@NotNull @Validated(Create.class) @RequestBody User userDto) {
 
-        userDto.setId(UUID.randomUUID().toString());
+      //  userDto.setId(UUID.randomUUID().toString());
         log.info("User with id: {} was created via controller at" + " time: " + LocalDateTime.now(), userDto.getId());
         return service.create(userDto);
     }

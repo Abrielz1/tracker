@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -34,12 +35,15 @@ public class UserService {
         return repository.findById(id).map(user -> objectMapper.convertValue(user, UserDto.class));
     }
 
-    public Mono<UserDto> create(UserDto userDto) {
+    public Mono<User> create(User userDto) {
 
-        log.info("User with id: {} was created via controller at" + " time: " + LocalDateTime.now(), userDto.getId());
-        User user = objectMapper.convertValue(userDto, User.class);
-        repository.save(user);
-        return Mono.just(objectMapper.convertValue(user, UserDto.class));
+        log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
+      //  User user = objectMapper.convertValue(userDto, User.class);
+//        repository.save(userDto);
+       userDto.setId(UUID.randomUUID().toString());
+        //return Mono.just(objectMapper.convertValue(user, UserDto.class));
+
+        return repository.save(userDto);
     }
 
     public Mono<UserDto> update(String id, UserDto userDto) {
