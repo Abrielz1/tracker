@@ -39,6 +39,7 @@ public class TaskService {
 
         Flux<Task> taskFlux = repository.findAll();
         Flux<User> userFlux = userRepository.findAll();
+
 //        List<User> userFluxObserver = (List<User>) userRepository.findAll();
 //        List<Task> taskList = (List<Task>) repository.findAll();
 //        List<User> result = new ArrayList<>();
@@ -70,8 +71,8 @@ public class TaskService {
                 tuple.getT1().getAuthorId(),
                 tuple.getT1().getAssigneeId(),
                 tuple.getT1().getObserverIds(),
-                objectMapper.convertValue(tuple.getT2(), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                objectMapper.convertValue(userRepository.findById(tuple.getT1().getObserverIds().toString()), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                objectMapper.convertValue(userRepository.findById(String.valueOf(tuple.getT1().getAuthorId())), UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                objectMapper.convertValue(userRepository.findById(String.valueOf(tuple.getT1().getAssigneeId())), UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
                 new HashSet<>())));
     }
 
