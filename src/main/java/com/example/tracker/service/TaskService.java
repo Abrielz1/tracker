@@ -15,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +38,8 @@ public class TaskService {
 
         Flux<Task> taskFlux = repository.findAll();
         Flux<User> userFlux = userRepository.findAll();
+        List<User> userList = userAssignee().collectList().share().block(); //это говно не я придумал, а какой-то ai по ссылке выдал
+        // https://davy.ai/in-java-reactive-programming-how-to-convert-fluxobject-to-listobject-without-block/
 
         return Flux.zip(taskFlux, userFlux).flatMap(
                 tuple -> Flux.just(
@@ -49,9 +53,9 @@ public class TaskService {
                 tuple.getT1().getAuthorId(),
                 tuple.getT1().getAssigneeId(),
                 tuple.getT1().getObserverIds(),
-                objectMapper.convertValue(userRepository.findById(String.valueOf(tuple.getT1().getAuthorId())), UserDto.class),
-                objectMapper.convertValue(userRepository.findById(String.valueOf(tuple.getT1().getAssigneeId())), UserDto.class),
-                new HashSet<>())));
+                objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAuthorId()), UserDto.class),
+                objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAssigneeId()), UserDto.class),
+                new HashSet<>(userList))));
     }
 
     public Mono<TaskDto> getById(String id) {
@@ -61,6 +65,7 @@ public class TaskService {
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = taskMono.flatMap(user -> userRepository.findById(user.getAuthorId()));
         Mono<User> userMonoAssignee = taskMono.flatMap(user -> userRepository.findById(user.getAssigneeId()));
+        List<User> userList = userAssignee().collectList().share().block();
 
         return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
@@ -75,7 +80,7 @@ public class TaskService {
                         tuple.getT1().getObserverIds(),
                         objectMapper.convertValue(tuple.getT2(), UserDto.class),
                         objectMapper.convertValue(tuple.getT3(), UserDto.class),
-                        new HashSet<>()
+                        new HashSet<>(userList)
                 ));
     }
 
