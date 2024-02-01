@@ -137,19 +137,19 @@ public class TaskService {
         });
     }
 
-    public Mono<TaskDto> addAssignee(String id, String assigneeId, TaskDto taskDto) {
+    public Mono<Task> addAssignee(String id, String assigneeId) {
 
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
 
         return getById(id).flatMap(taskForUpdate -> {
 
-            if (StringUtils.hasText(taskDto.getAssigneeId())) {
-                taskForUpdate.setAssigneeId(taskDto.getAssigneeId());
+            if (StringUtils.hasText(assigneeId) || (taskForUpdate.getAssigneeId()!= null
+                    && !taskForUpdate.getAssigneeId().equals(assigneeId))) {
+                taskForUpdate.setAssigneeId(assigneeId);
             }
-            repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
-            return Mono.just(objectMapper.convertValue(taskForUpdate, TaskDto.class));
 
+            return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
     }
 
