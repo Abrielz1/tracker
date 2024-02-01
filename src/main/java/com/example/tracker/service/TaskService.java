@@ -59,7 +59,7 @@ public class TaskService {
         log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = taskMono.flatMap(user -> userRepository.findById(user.getAuthorId()));
-        Mono<User> userMonoAssignee = taskMono.flatMap(user -> userRepository.findById(user.getAuthorId()));
+        Mono<User> userMonoAssignee = taskMono.flatMap(user -> userRepository.findById(user.getAssigneeId()));
 
         return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
