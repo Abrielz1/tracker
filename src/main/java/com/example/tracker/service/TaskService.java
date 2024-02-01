@@ -105,8 +105,8 @@ public class TaskService {
                         tuple.getT1().getAuthorId(),
                         tuple.getT1().getAssigneeId(),
                         tuple.getT1().getObserverIds(),
-                        new UserDto(), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
-                        new UserDto(), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
+                        objectMapper.convertValue(userMonoAuthor, UserDto.class), //TODO:  (в ответе также должны находиться вложенные сущности, которые описывают автора задачи и исполнителя,
+                        objectMapper.convertValue(userMonoAssignee, UserDto.class), //TODO:  а также содержат список наблюдающих за задачей) @GetMapping() getAll()
                         new HashSet<>()
                 ));
     }
