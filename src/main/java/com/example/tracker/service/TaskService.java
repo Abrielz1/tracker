@@ -72,6 +72,7 @@ public class TaskService {
                 list.add(i.get(j));
             }
         }
+
         return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
                         tuple.getT1().getId(),
