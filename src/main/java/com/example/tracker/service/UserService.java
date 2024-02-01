@@ -32,7 +32,8 @@ public class UserService {
     public Mono<UserDto> getById(String id) {
 
         log.info("User with id: {} was sent from db via service to controller at" + " time: " + LocalDateTime.now(), id);
-        return repository.findById(id).map(user -> objectMapper.convertValue(user, UserDto.class));
+        return repository.findById(id).map(user ->
+                        objectMapper.convertValue(user, UserDto.class));
     }
 
     public Mono<User> create(UserDto userDto) {

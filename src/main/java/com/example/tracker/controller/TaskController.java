@@ -48,7 +48,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<TaskDto> getById(@PathVariable String id) { //@NotBlank @NotBlank
+    public Mono<TaskDto> getById(@PathVariable String id) {
 
         log.info("Task with id: {} was sent via controller at" + " time: " + LocalDateTime.now(), id);
         return service.getById(id);
@@ -63,7 +63,7 @@ public class TaskController {
         return service.create(taskDto);
     }
 
-    @PutMapping("/{id}") //@PutMapping("/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<Task> update(@PathVariable String id, //@NotBlank
                                 @RequestParam("userId") String userId, //@NotBlank
@@ -86,7 +86,7 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> removeById(@NotBlank @PathVariable String id) {
+    public Mono<Void> removeById(@PathVariable String id) {
 
         log.info("Task with id: {} was removed via controller at" + " time: " + LocalDateTime.now(), id);
         return service.removeById(id);

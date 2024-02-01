@@ -57,6 +57,7 @@ public class TaskService {
     public Mono<TaskDto> getById(String id) {
 
         log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
+
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = taskMono.flatMap(user -> userRepository.findById(user.getAuthorId()));
         Mono<User> userMonoAssignee = taskMono.flatMap(user -> userRepository.findById(user.getAssigneeId()));
@@ -72,8 +73,8 @@ public class TaskService {
                         tuple.getT1().getAuthorId(),
                         tuple.getT1().getAssigneeId(),
                         tuple.getT1().getObserverIds(),
-                        objectMapper.convertValue(userMonoAuthor, UserDto.class),
-                        objectMapper.convertValue(userMonoAssignee, UserDto.class),
+                        objectMapper.convertValue(tuple.getT2(), UserDto.class),
+                        objectMapper.convertValue(tuple.getT3(), UserDto.class),
                         new HashSet<>()
                 ));
     }
