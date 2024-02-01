@@ -76,8 +76,8 @@ public class TaskController {
 
     @PutMapping("/addAssignee/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<TaskDto> addAssignee(@NotBlank @PathVariable String id,
-                                     @NotBlank @RequestParam String assigneeId,
+    public Mono<TaskDto> addAssignee(@PathVariable String id,
+                                     @RequestParam String assigneeId,
                                      @Validated(Update.class) @RequestBody TaskDto taskDto) {
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -38,10 +39,8 @@ public class TaskService {
 
         Flux<Task> taskFlux = repository.findAll();
         Flux<User> userFlux = userRepository.findAll();
-        List<User> userList = userAssignee().collectList().share().block(); //это говно не я придумал, а какой-то ai по ссылке выдал
-        // https://davy.ai/in-java-reactive-programming-how-to-convert-fluxobject-to-listobject-without-block/
 
-        return Flux.zip(taskFlux, userFlux).flatMap(
+        return Flux.zip(taskFlux, userFlux, userAssignee()).flatMap(
                 tuple -> Flux.just(
                 new TaskDto(
                 tuple.getT1().getId(),
@@ -55,7 +54,7 @@ public class TaskService {
                 tuple.getT1().getObserverIds(),
                 objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAuthorId()), UserDto.class),
                 objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAssigneeId()), UserDto.class),
-                new HashSet<>(userList))));
+                new HashSet<>(tuple.getT3()))));
     }
 
     public Mono<TaskDto> getById(String id) {
@@ -65,8 +64,14 @@ public class TaskService {
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = taskMono.flatMap(user -> userRepository.findById(user.getAuthorId()));
         Mono<User> userMonoAssignee = taskMono.flatMap(user -> userRepository.findById(user.getAssigneeId()));
-        List<User> userList = userAssignee().collectList().share().block();
 
+        List<List<User>> listMono = userAssignee().collectList().share().block();;
+        List<User> list = new ArrayList<>();
+        for (List<User> i : listMono) {
+            for (int j = 0; j < i.size(); j++) {
+                list.add(i.get(j));
+            }
+        }
         return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
                         tuple.getT1().getId(),
@@ -80,7 +85,7 @@ public class TaskService {
                         tuple.getT1().getObserverIds(),
                         objectMapper.convertValue(tuple.getT2(), UserDto.class),
                         objectMapper.convertValue(tuple.getT3(), UserDto.class),
-                        new HashSet<>(userList)
+                        new HashSet<>(list)
                 ));
     }
 
@@ -123,6 +128,10 @@ public class TaskService {
                 taskForUpdate.setStatus(taskDto.getStatus());
             }
 
+            if (taskDto.getObserverIds() != null) {
+                taskForUpdate.setObserverIds(taskDto.getObserverIds());
+            }
+
           return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
     }
@@ -149,22 +158,21 @@ public class TaskService {
         return repository.deleteById(id);
     }
 
-    private Flux<User> userAssignee() {
+    private Flux<List<User>> userAssignee() {
         Flux<Task> tasks = repository.findAll();
-        Flux<User> userAssignee = tasks.flatMap(x -> userRepository.findById(x.getAssigneeId()));
         Flux<List<User>> userObObserver = tasks.flatMap(user -> {
             Set<Mono<User>> monoset = new HashSet<>();
-            for (String observId : user.getObserverIds()) {
-                monoset.add(userRepository.findById(observId));
+            for (String observerId : user.getObserverIds()) {
+                monoset.add(userRepository.findById(observerId));
             }
 
             Flux merged = Flux.empty();
             for (Mono out : monoset) {
                 merged = merged.mergeWith(out);
             }
-            return merged.collectList();
+           return merged.collectList();
         });
 
-        return userAssignee;
+        return userObObserver;
     }
 }

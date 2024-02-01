@@ -22,24 +22,24 @@ public class TaskDto {
     @NotBlank
     private String id;
 
-    @NotBlank
+   // @NotBlank
     private String name;
 
-    @NotBlank
+   // @NotBlank
     private String description;
 
-    @NotNull
+   // @NotNull
     private Instant createdAt;
 
-    @NotNull
+  //  @NotNull
     private Instant updatedAt;
 
     private TaskStatus status;
 
-    @NotBlank
+ //   @NotBlank
     private String authorId;
 
-    @NotBlank
+ //   @NotBlank
     private String assigneeId;
 
     private Set<String> observerIds = new HashSet<>();
