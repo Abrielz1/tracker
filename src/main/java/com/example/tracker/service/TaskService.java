@@ -81,18 +81,18 @@ public class TaskService {
     //  которые описывают автора задачи и исполнителя,
     //  а также содержат список наблюдающих за задачей) @GetMapping("{/id}") getById(@Positive @PathVariable String id)
 
-    public Mono<TaskDto> getById(String id) {
-
-        log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
-        Mono<Task> taskMono = repository.findById(id);
-        Mono<User> userMonoAuthor = userRepository.findById(taskMono.block().getAuthorId());
-        Mono<User> userMonoAssignee = userRepository.findById(taskMono.block().getAssigneeId());
-
 //        List<UserDto> userList = (List<UserDto>) userAssignee();
 //        List<UserDto> list = userList.stream()
 //                .map(user ->
 //                        objectMapper.convertValue(user, UserDto.class))
 //                .toList();
+
+    public Mono<TaskDto> getById(String id) {
+
+        log.info("Task with id: {} was sent via service at" + " time: " + LocalDateTime.now(), id);
+        Mono<Task> taskMono = repository.findById(id);
+        Mono<User> userMonoAuthor = taskMono.flatMap(task -> userRepository.findById(task.getAuthorId()));
+        Mono<User> userMonoAssignee = taskMono.flatMap(task -> userRepository.findById(task.getAuthorId()));
 
         return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
