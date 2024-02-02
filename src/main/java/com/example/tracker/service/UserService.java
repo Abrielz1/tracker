@@ -20,49 +20,41 @@ public class UserService {
 
     private final UserRepository repository;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper;
 
     public Flux<UserDto> getAll() {
 
         log.info("users were sent to controller via service at" + " time: " + LocalDateTime.now());
         return repository.findAll().map(user ->
-                        objectMapper.convertValue(user, UserDto.class));
+                objectMapper.convertValue(user, UserDto.class));
     }
 
     public Mono<UserDto> getById(String id) {
 
         log.info("User with id: {} was sent from db via service to controller at" + " time: " + LocalDateTime.now(), id);
         return repository.findById(id).map(user ->
-                        objectMapper.convertValue(user, UserDto.class));
+                objectMapper.convertValue(user, UserDto.class));
     }
 
     public Mono<User> create(UserDto userDto) {
 
-        log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
         userDto.setId(UUID.randomUUID().toString());
-        User user = objectMapper.convertValue(userDto, User.class);
-//        repository.save(userDto);
-
-        //return Mono.just(objectMapper.convertValue(user, UserDto.class));
-
-        return repository.save(user);
+        log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
+        return repository.save(objectMapper.convertValue(userDto, User.class));
     }
 
-    public Mono<UserDto> update(String id, UserDto userDto) {
+    public Mono<User> update(String id, UserDto userDto) {
 
-       log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
+        log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
         return getById(id).flatMap(userForUpdate -> {
 
-            if (StringUtils.hasText(userDto.getUsername())) { //not null and not blanc
+            if (StringUtils.hasText(userDto.getUsername())) {
                 userForUpdate.setUsername(userDto.getUsername());
             }
-
-            if (StringUtils.hasText(userDto.getEmail())) { //not null and not blanc
+            if (StringUtils.hasText(userDto.getEmail())) {
                 userForUpdate.setEmail(userDto.getEmail());
             }
-
-            repository.save(objectMapper.convertValue(userForUpdate, User.class));
-            return Mono.just(objectMapper.convertValue(userForUpdate, UserDto.class));
+            return repository.save(objectMapper.convertValue(userForUpdate, User.class));
         });
     }
 

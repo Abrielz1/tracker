@@ -6,7 +6,6 @@ import com.example.tracker.dto.TaskDto;
 import com.example.tracker.model.Task;
 import com.example.tracker.publisher.TaskUpdatesPublisher;
 import com.example.tracker.service.TaskService;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,11 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/task-tracker/tasks") // /task-tracker/users
+@Validated
+@RequestMapping("/task-tracker/tasks")
 @AllArgsConstructor
 public class TaskController {
 
@@ -58,7 +57,6 @@ public class TaskController {
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Task> create(@Validated(Create.class) @RequestBody TaskDto taskDto) {
 
-        taskDto.setId(UUID.randomUUID().toString());
         log.info("Task was created and id: {} was st via controller at" + " time: " + LocalDateTime.now(), taskDto.getId());
         return service.create(taskDto);
     }
@@ -77,7 +75,7 @@ public class TaskController {
     @PutMapping("/addAssignee/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<Task> addAssignee(@PathVariable String id,
-                                     @RequestParam String assigneeId) {
+                                  @RequestParam String assigneeId) {
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
         return service.addAssignee(id, assigneeId);
@@ -98,7 +96,7 @@ public class TaskController {
         return publisher.getUpdateSink()
                 .asFlux()
                 .map(task -> ServerSentEvent
-                .builder(task)
-                .build());
+                        .builder(task)
+                        .build());
     }
 }

@@ -15,12 +15,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -31,7 +30,7 @@ public class TaskService {
 
     private final UserRepository userRepository;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper;
 
     public Flux<TaskDto> getAll() {
 
@@ -42,19 +41,19 @@ public class TaskService {
 
         return Flux.zip(taskFlux, userFlux, userAssignee()).flatMap(
                 tuple -> Flux.just(
-                new TaskDto(
-                tuple.getT1().getId(),
-                tuple.getT1().getName(),
-                tuple.getT1().getDescription(),
-                tuple.getT1().getCreatedAt(),
-                tuple.getT1().getUpdatedAt(),
-                tuple.getT1().getStatus(),
-                tuple.getT1().getAuthorId(),
-                tuple.getT1().getAssigneeId(),
-                tuple.getT1().getObserverIds(),
-                objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAuthorId()), UserDto.class),
-                objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAssigneeId()), UserDto.class),
-                new HashSet<>(tuple.getT3()))));
+                        new TaskDto(
+                                tuple.getT1().getId(),
+                                tuple.getT1().getName(),
+                                tuple.getT1().getDescription(),
+                                tuple.getT1().getCreatedAt(),
+                                tuple.getT1().getUpdatedAt(),
+                                tuple.getT1().getStatus(),
+                                tuple.getT1().getAuthorId(),
+                                tuple.getT1().getAssigneeId(),
+                                tuple.getT1().getObserverIds(),
+                                objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAuthorId()), UserDto.class),
+                                objectMapper.convertValue(tuple.mapT2(user -> tuple.getT1().getAssigneeId()), UserDto.class),
+                                new HashSet<>(tuple.getT3()))));
     }
 
     public Mono<TaskDto> getById(String id) {
@@ -64,14 +63,8 @@ public class TaskService {
         Mono<Task> taskMono = repository.findById(id);
         Mono<User> userMonoAuthor = taskMono.flatMap(user -> userRepository.findById(user.getAuthorId()));
         Mono<User> userMonoAssignee = taskMono.flatMap(user -> userRepository.findById(user.getAssigneeId()));
-
-        List<List<User>> listMono = userAssignee().collectList().share().block();;
-        List<User> list = new ArrayList<>();
-        for (List<User> i : listMono) {
-            for (int j = 0; j < i.size(); j++) {
-                list.add(i.get(j));
-            }
-        }
+        List<User> userList = Objects.requireNonNull(userAssignee().collectList().share().block())
+                .stream().flatMap(List::stream).toList();
 
         return Mono.zip(taskMono, userMonoAuthor, userMonoAssignee).map(
                 tuple -> new TaskDto(
@@ -86,16 +79,17 @@ public class TaskService {
                         tuple.getT1().getObserverIds(),
                         objectMapper.convertValue(tuple.getT2(), UserDto.class),
                         objectMapper.convertValue(tuple.getT3(), UserDto.class),
-                        new HashSet<>(list)
+                        new HashSet<>(userList)
                 ));
     }
 
     public Mono<Task> create(TaskDto taskDto) {
 
-        log.info("Task was created via service at" + " time: " + LocalDateTime.now());
+        taskDto.setId(UUID.randomUUID().toString());
+        log.info("Task with id: {} was created via service at" + " time: " + LocalDateTime.now(),
+                taskDto.getId());
         taskDto.setCreatedAt(Instant.now());
         Task task = (objectMapper.convertValue(taskDto, Task.class));
-        repository.save(task);
         return repository.save(task);
     }
 
@@ -103,7 +97,6 @@ public class TaskService {
 
         log.info("Task with id: {} and with userId: {}" +
                 " was updated via service at" + " time: " + LocalDateTime.now(), id, userId);
-
         return getById(id).flatMap(taskForUpdate -> {
 
             if (StringUtils.hasText(taskDto.getName())) {
@@ -116,15 +109,6 @@ public class TaskService {
 
             taskForUpdate.setUpdatedAt(Instant.now());
 
-            if (StringUtils.hasText(taskDto.getAssigneeId())) { // TODO: проверить тз
-                taskForUpdate.setAssigneeId(taskDto.getAssigneeId());
-            }
-
-            if (StringUtils.hasText(taskDto.getAuthorId())) { // TODO: проверить тз
-                taskForUpdate.setAuthorId(taskDto.getAuthorId());
-
-            }
-
             if (taskDto.getStatus() != null) {
                 taskForUpdate.setStatus(taskDto.getStatus());
             }
@@ -132,8 +116,7 @@ public class TaskService {
             if (taskDto.getObserverIds() != null) {
                 taskForUpdate.setObserverIds(taskDto.getObserverIds());
             }
-
-          return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
+            return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
     }
 
@@ -141,11 +124,8 @@ public class TaskService {
 
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
-
         return getById(id).flatMap(taskForUpdate -> {
-
-            if (StringUtils.hasText(assigneeId) || (taskForUpdate.getAssigneeId()!= null
-                    && !taskForUpdate.getAssigneeId().equals(assigneeId))) {
+            if (StringUtils.hasText(assigneeId) || !taskForUpdate.getAssigneeId().equals(assigneeId)) {
                 taskForUpdate.setAssigneeId(assigneeId);
             }
 
@@ -171,7 +151,7 @@ public class TaskService {
             for (Mono out : monoset) {
                 merged = merged.mergeWith(out);
             }
-           return merged.collectList();
+            return merged.collectList();
         });
 
         return userObObserver;
