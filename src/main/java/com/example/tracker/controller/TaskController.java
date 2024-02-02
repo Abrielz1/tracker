@@ -72,13 +72,13 @@ public class TaskController {
         return service.update(id, userId, taskDto);
     }
 
-    @PutMapping("/addAssignee/{id}")
+    @PutMapping("/addObserver/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Task> addAssignee(@PathVariable String id,
-                                  @RequestParam String assigneeId) {
-        log.info("Task with id: {} and with assigneeId: {}" +
-                " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
-        return service.addAssignee(id, assigneeId);
+    public Mono<Task> addObserver(@PathVariable String id,
+                                  @RequestParam(name = "observerId") String observerId) {
+        log.info("Task with id: {} and with observerId: {}" +
+                " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
+        return service.addObserver(id, observerId);
     }
 
     @DeleteMapping("/{id}")

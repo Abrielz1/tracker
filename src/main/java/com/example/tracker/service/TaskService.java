@@ -89,8 +89,7 @@ public class TaskService {
         log.info("Task with id: {} was created via service at" + " time: " + LocalDateTime.now(),
                 taskDto.getId());
         taskDto.setCreatedAt(Instant.now());
-        Task task = (objectMapper.convertValue(taskDto, Task.class));
-        return repository.save(task);
+        return repository.save(objectMapper.convertValue(taskDto, Task.class));
     }
 
     public Mono<Task> update(String id, String userId, TaskDto taskDto) {
@@ -120,15 +119,15 @@ public class TaskService {
         });
     }
 
-    public Mono<Task> addAssignee(String id, String assigneeId) {
+    public Mono<Task> addObserver(String id, String observerId) {
 
         log.info("Task with id: {} and with assigneeId: {}" +
-                " was updated via controller at" + " time: " + LocalDateTime.now(), id, assigneeId);
+                " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
+       Mono<User> userMono = userRepository.findById(observerId);
         return getById(id).flatMap(taskForUpdate -> {
-            if (StringUtils.hasText(assigneeId) || !taskForUpdate.getAssigneeId().equals(assigneeId)) {
-                taskForUpdate.setAssigneeId(assigneeId);
+            if (StringUtils.hasText(observerId)) {
+                taskForUpdate.setObservers((Set<User>) userMono);
             }
-
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
     }
