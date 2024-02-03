@@ -123,10 +123,12 @@ public class TaskService {
 
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
-       Mono<User> userMono = userRepository.findById(observerId);
+        Mono<User> userMono = userRepository.findById(observerId);
         return getById(id).flatMap(taskForUpdate -> {
-            if (StringUtils.hasText(observerId)) {
+            if (StringUtils.hasText(observerId) && taskForUpdate.getObserverIds().size() == 0) {
                 taskForUpdate.setObservers((Set<User>) userMono);
+            } else {
+                taskForUpdate.getObservers().add(userMono.block());
             }
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
