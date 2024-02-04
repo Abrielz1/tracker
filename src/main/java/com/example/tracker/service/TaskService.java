@@ -15,7 +15,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -127,8 +126,8 @@ public class TaskService {
         Mono<User> userMono = userRepository.findById(observerId);
         return getById(id).flatMap(taskForUpdate -> {
             if (StringUtils.hasText(observerId) && taskForUpdate.getObserverIds().size() == 0) {
-               Set<User> set = new HashSet<>();
-               set.add(objectMapper.convertValue(userMono, User.class));
+                Set<User> set = new HashSet<>();
+                set.add(objectMapper.convertValue(userMono, User.class));
                 taskForUpdate.setObservers(set);
             } else {
                 taskForUpdate.getObservers().add(userMono.block());
