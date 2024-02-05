@@ -129,8 +129,10 @@ public class TaskService {
                 Set<User> set = new HashSet<>();
                 set.add(objectMapper.convertValue(userMono, User.class));
                 taskForUpdate.setObservers(set);
+                taskForUpdate.setUpdatedAt(Instant.now());
             } else {
                 taskForUpdate.getObservers().add(userMono.block());
+                taskForUpdate.setUpdatedAt(Instant.now());
             }
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
