@@ -14,9 +14,10 @@ public class AppUserPrinciple implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRole().stream().map(Role::toAuthority).toList();
+        return user.getRole().stream()
+                .map(Role::toAuthority)
+                .toList();
     }
-
     @Override
     public String getPassword() {
         return user.getPassword();
