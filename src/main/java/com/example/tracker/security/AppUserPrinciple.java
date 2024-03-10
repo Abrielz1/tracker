@@ -1,10 +1,15 @@
 package com.example.tracker.security;
 
+import com.example.tracker.enums.RoleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
 import java.util.Collection;
-import com.example.tracker.model.Role;
+import java.util.Collections;
+import java.util.List;
+
 import com.example.tracker.model.User;
 
 @RequiredArgsConstructor
@@ -12,11 +17,13 @@ public class AppUserPrinciple implements UserDetails {
 
     private final User user;
 
+    private final List<GrantedAuthority> authorities = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRole().stream()
-                .map(Role::toAuthority)
-                .toList();
+       // authorities.add(user.getRoles().get(0));
+        authorities.add(user.toAuthority());
+        return authorities;
     }
     @Override
     public String getPassword() {

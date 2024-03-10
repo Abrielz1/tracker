@@ -3,7 +3,6 @@ package com.example.tracker.service;
 import com.example.tracker.dto.UserDto;
 import com.example.tracker.dto.UserNewDto;
 import com.example.tracker.enums.RoleType;
-import com.example.tracker.model.Role;
 import com.example.tracker.model.User;
 import com.example.tracker.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,14 +45,15 @@ public class UserService {
     public Mono<User> create(UserNewDto userDto, RoleType roleType) {
 
         userDto.setId(UUID.randomUUID().toString());
-     //   var role = Role.from(roleType);
-        var user = new User();
+
+        User user = new User();
         user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
         user.setPassword(encoder.encode(userDto.getPassword()));
-        user.setRole(Collections.singletonList(Role.from(roleType)));
-    //    role.setUser(user);
+        user.setRoles(Collections.singletonList(roleType));
         log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
-        return repository.save(objectMapper.convertValue(userDto, User.class));
+
+        return repository.save(user);
     }
 
     public Mono<User> update(String id, UserNewDto userDto) {
@@ -67,6 +67,7 @@ public class UserService {
             if (StringUtils.hasText(userDto.getEmail())) {
                 userForUpdate.setEmail(userDto.getEmail());
             }
+
             return repository.save(objectMapper.convertValue(userForUpdate, User.class));
         });
     }

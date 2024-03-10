@@ -1,6 +1,9 @@
 package com.example.tracker.model;
 
 import com.example.tracker.dto.UserDto;
+import com.example.tracker.enums.RoleType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +11,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,15 +34,12 @@ public class User {
 
     private String password;
 
+    @Field("roles")
     @EqualsAndHashCode.Exclude
-    private List<Role> role = new ArrayList<>();
+    List<RoleType> roles = new ArrayList<>();
 
-    public static UserDto from(User model) {
+    public GrantedAuthority toAuthority() {
 
-        UserDto userDto = new UserDto();
-        userDto.setUsername(model.getUsername());
-        userDto.setEmail(model.getEmail());
-
-        return userDto;
+        return new SimpleGrantedAuthority(roles.get(0).toString());
     }
 }

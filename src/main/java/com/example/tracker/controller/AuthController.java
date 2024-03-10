@@ -4,6 +4,7 @@ import com.example.tracker.Create;
 import com.example.tracker.dto.UserDto;
 import com.example.tracker.dto.UserNewDto;
 import com.example.tracker.enums.RoleType;
+import com.example.tracker.model.User;
 import com.example.tracker.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,10 @@ public class AuthController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<UserDto> create(@Validated(Create.class) @RequestBody UserNewDto userDto,
-                                @RequestParam(name = "type") RoleType roleType) {
+    public Mono<User> create(@Validated(Create.class) @RequestBody UserNewDto userDto,
+                             @RequestParam(name = "type") RoleType roleType) {
 
         log.info("User was created via controller at" + " time: " + LocalDateTime.now());
-        return Mono.just(objectMapper.convertValue(service.create(userDto, roleType), UserDto.class));
+        return service.create(userDto, roleType);
     }
 }

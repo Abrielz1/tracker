@@ -3,6 +3,7 @@ package com.example.tracker.controller;
 import com.example.tracker.Update;
 import com.example.tracker.dto.UserDto;
 import com.example.tracker.dto.UserNewDto;
+import com.example.tracker.model.User;
 import com.example.tracker.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -55,10 +56,10 @@ public class UserController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('USER') or ('MANAGER')")
-    public Mono<UserDto> update(@PathVariable String id, @Validated(Update.class) @RequestBody UserNewDto userDto) {
+    public Mono<User> update(@PathVariable String id, @Validated(Update.class) @RequestBody UserNewDto userDto) {
 
         log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
-        return Mono.just(objectMapper.convertValue(service.update(id, userDto), UserDto.class));
+        return service.update(id, userDto);
     }
 
     @DeleteMapping("/{id}")
