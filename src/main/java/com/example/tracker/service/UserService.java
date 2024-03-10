@@ -79,6 +79,7 @@ public class UserService {
     }
 
     public User findByName(String username) {
+
         return repository.findByUsername(username).orElseThrow(()->
                 new RuntimeException("User with name: %s not found!".formatted(username)));
     }

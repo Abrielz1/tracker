@@ -45,7 +45,12 @@ public class SecurityConfiguration {
 
     private ServerHttpSecurity buildDefaultSecurity(ServerHttpSecurity httpSecurity) {
         return httpSecurity.csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange((auth) -> auth.pathMatchers("/auth/**").permitAll()
+                .authorizeExchange((auth) -> auth.pathMatchers("/auth/**")
+                        .permitAll()
+                        .pathMatchers("/task-tracker/users/**")
+                        .hasAnyRole("USER", "MANAGER")
+                        .pathMatchers("/task-tracker/tasks/**")
+                        .hasAnyRole("USER", "MANAGER")
                         .anyExchange().authenticated())
                 .httpBasic(Customizer.withDefaults());
     }
