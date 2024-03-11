@@ -1,6 +1,11 @@
 package com.example.tracker.model;
 
 import com.example.tracker.enums.RoleType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,12 +29,19 @@ public class User {
     @Id
     private String id;
 
+    @NotBlank
+    @Column(unique = true)
     private String username;
 
+    @Email
+    @NotBlank
+    @Column(unique = true)
     private String email;
 
+    @NotBlank
     private String password;
 
+    @Enumerated(EnumType.STRING)
     private RoleType authority;
 
     @Field("roles")
@@ -37,7 +49,6 @@ public class User {
     List<RoleType> roles = new ArrayList<>();
 
     public GrantedAuthority toAuthority() {
-
         return new SimpleGrantedAuthority(authority.name());
     }
 }
