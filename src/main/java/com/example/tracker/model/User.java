@@ -1,9 +1,6 @@
 package com.example.tracker.model;
 
-import com.example.tracker.dto.UserDto;
 import com.example.tracker.enums.RoleType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +11,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,12 +30,14 @@ public class User {
 
     private String password;
 
+    private RoleType authority;
+
     @Field("roles")
     @EqualsAndHashCode.Exclude
     List<RoleType> roles = new ArrayList<>();
 
     public GrantedAuthority toAuthority() {
 
-        return new SimpleGrantedAuthority(roles.get(0).toString());
+        return new SimpleGrantedAuthority(authority.name());
     }
 }
