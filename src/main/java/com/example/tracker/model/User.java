@@ -40,15 +40,20 @@ public class User {
 
     @NotBlank
     private String password;
-
-    @Enumerated(EnumType.STRING)
-    private RoleType authority;
+//
+//    @Enumerated(EnumType.STRING)
+//    private RoleType authority;
 
     @Field("roles")
     @EqualsAndHashCode.Exclude
     List<RoleType> roles = new ArrayList<>();
 
     public GrantedAuthority toAuthority() {
-        return new SimpleGrantedAuthority(authority.name());
+       // System.out.println("toAuthority() " + authority.name());
+        return new SimpleGrantedAuthority(roles.get(0).name());
+    }
+
+    public class Role {
+
     }
 }

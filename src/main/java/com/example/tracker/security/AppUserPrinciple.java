@@ -5,7 +5,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import com.example.tracker.model.User;
 
 @RequiredArgsConstructor
@@ -17,11 +20,10 @@ public class AppUserPrinciple implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        for (int i = 0; i <= user.getRoles().size(); i++) {
-            authorities.add(user.toAuthority());
-        }
 
+            authorities.add(user.toAuthority());
         return authorities;
+
     }
     @Override
     public String getPassword() {
