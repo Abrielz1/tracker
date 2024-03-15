@@ -16,8 +16,8 @@ public class AppUserPrinciple implements UserDetails {
     private final List<GrantedAuthority> authorities = new ArrayList<>();
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() { //
-        for (int i = 0; i < user.getRoles().size() - 1; i++) {
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        for (int i = 0; i <= user.getRoles().size(); i++) {
             authorities.add(user.toAuthority());
         }
 

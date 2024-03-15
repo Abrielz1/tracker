@@ -78,9 +78,7 @@ public class UserService {
         return repository.deleteById(id);
     }
 
-    public User findByName(String username) {
-
-        return repository.findByUsername(username).orElseThrow(()->
-                new RuntimeException("User with name: %s not found!".formatted(username)));
+    public Mono<User> findByName(String username) {
+        return repository.findByUsername(username);
     }
 }
