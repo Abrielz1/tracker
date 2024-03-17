@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface UserRepository  extends ReactiveMongoRepository<User, String> {
 
-    User findByUsername(String username);
+    Mono<User> findByUsername(String username);
 }

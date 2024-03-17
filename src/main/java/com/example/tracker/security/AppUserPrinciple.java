@@ -2,6 +2,7 @@ package com.example.tracker.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,13 +17,13 @@ public class AppUserPrinciple implements UserDetails  {
 
     private final User user;
 
-    private final List<GrantedAuthority> authorities = new ArrayList<>();
+    public String getId() {
+        return user.getId();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
-            authorities.add(user.toAuthority());
-        return authorities;
+        return user.getRoles().stream().map(it -> new SimpleGrantedAuthority(it.name())).toList();
 
     }
     @Override

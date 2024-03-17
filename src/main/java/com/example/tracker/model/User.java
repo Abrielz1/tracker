@@ -1,6 +1,7 @@
 package com.example.tracker.model;
 
 import com.example.tracker.enums.RoleType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,29 +28,31 @@ import java.util.List;
 public class User {
 
     @Id
+    @Column(name = "id")
     private String id;
 
     @NotBlank
-    @Column(unique = true)
+    @Column(unique = true, name = "username")
     private String username;
 
     @Email
     @NotBlank
-    @Column(unique = true)
+    @Column(unique = true, name = "email")
     private String email;
 
     @NotBlank
+    @Column(name = "password")
     private String password;
 //
-//    @Enumerated(EnumType.STRING)
-    private String authority;
+//    @JsonProperty("authority")
+//    @Column(name = "authority")
+//    private String authority;
 
     @Field("roles")
     @EqualsAndHashCode.Exclude
     List<RoleType> roles = new ArrayList<>();
 
-    public GrantedAuthority toAuthority() {
-       // System.out.println("toAuthority() " + authority.name());
-        return new SimpleGrantedAuthority(roles.get(0).name());
+    public void  toAuthority(RoleType roleType) {
+        roles.add(roleType);
     }
 }
