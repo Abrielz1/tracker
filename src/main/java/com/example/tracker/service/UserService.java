@@ -51,7 +51,7 @@ public class UserService {
         user.setEmail(userDto.getEmail());
         user.setPassword(encoder.encode(userDto.getPassword()));
         user.setRoles(Collections.singletonList(roleType));
-        //user.setAuthority(roleType);
+        user.setAuthority(roleType.name());
         log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
 
         return repository.save(user);
@@ -80,6 +80,8 @@ public class UserService {
     }
 
     public Mono<User> findByName(String username) {
-        return repository.findByUsername(username);
+        User user = repository.findByUsername(username);
+
+        return Mono.just(user);
     }
 }

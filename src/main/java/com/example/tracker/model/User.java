@@ -42,7 +42,7 @@ public class User {
     private String password;
 //
 //    @Enumerated(EnumType.STRING)
-//    private RoleType authority;
+    private String authority;
 
     @Field("roles")
     @EqualsAndHashCode.Exclude
@@ -51,9 +51,5 @@ public class User {
     public GrantedAuthority toAuthority() {
        // System.out.println("toAuthority() " + authority.name());
         return new SimpleGrantedAuthority(roles.get(0).name());
-    }
-
-    public class Role {
-
     }
 }

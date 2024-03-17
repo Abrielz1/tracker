@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import com.example.tracker.model.User;
 
 @RequiredArgsConstructor
-public class AppUserPrinciple implements UserDetails {
+public class AppUserPrinciple implements UserDetails  {
 
     private final User user;
 
