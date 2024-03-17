@@ -49,8 +49,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-
-
+    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Mono<TaskDto> getById(@PathVariable String id) {
 
         log.info("Task with id: {} was sent via controller at" + " time: " + LocalDateTime.now(), id);

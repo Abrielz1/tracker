@@ -19,6 +19,4 @@ public class ReactiveUserDetailsServiceImpl implements ReactiveUserDetailsServic
                 .flatMap(Mono::just)
                 .map(AppUserPrinciple::new);
     }
-
-
 }
