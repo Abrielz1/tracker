@@ -14,7 +14,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.UUID;
 
 @Slf4j
@@ -51,7 +50,7 @@ public class UserService {
         user.setEmail(userDto.getEmail());
         user.setPassword(encoder.encode(userDto.getPassword()));
         user.toAuthority(roleType);
-//        user.setAuthority(roleType.name());
+
         log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
 
         return repository.save(user);
@@ -78,10 +77,4 @@ public class UserService {
         log.info("User with id: {} was removed from db via service at" + " time: " + LocalDateTime.now(), id);
         return repository.deleteById(id);
     }
-
-//    public Mono<User> findByName(String username) {
-//        User user = repository.findByUsername(username);
-//
-//        return Mono.just(user);
-//    }
 }
