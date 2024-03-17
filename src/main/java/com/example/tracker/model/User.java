@@ -45,7 +45,7 @@ public class User {
     @EqualsAndHashCode.Exclude
     List<RoleType> roles = new ArrayList<>();
 
-    public void toAuthority(RoleType roleType) {
+    public void addRole(RoleType roleType) {
         roles.add(roleType);
     }
 }

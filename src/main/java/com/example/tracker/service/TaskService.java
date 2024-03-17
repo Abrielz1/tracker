@@ -6,6 +6,7 @@ import com.example.tracker.model.Task;
 import com.example.tracker.model.User;
 import com.example.tracker.repository.TaskRepository;
 import com.example.tracker.repository.UserRepository;
+import com.example.tracker.security.AppUserPrinciple;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,8 +84,9 @@ public class TaskService {
                 ));
     }
 
-    public Mono<Task> create(TaskDto taskDto) {
+    public Mono<Task> create(TaskDto taskDto, AppUserPrinciple principle) {
 
+        taskDto.setAuthorId(principle.getId());
         taskDto.setId(UUID.randomUUID().toString());
         log.info("Task with id: {} was created via service at" + " time: " + LocalDateTime.now(),
                 taskDto.getId());

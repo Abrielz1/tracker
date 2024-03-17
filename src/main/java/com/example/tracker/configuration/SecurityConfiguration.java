@@ -20,8 +20,7 @@ public class SecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
@@ -34,14 +33,13 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityWebFilterChain springSecurityChain(ServerHttpSecurity httpSecurity,
-                                                      ReactiveAuthenticationManager reactiveAuthenticationManager) {
-
-
-        return buildDefaultSecurity(httpSecurity)
-                .authenticationManager(reactiveAuthenticationManager)
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
+                                                            ReactiveAuthenticationManager authenticationManager) {
+        return buildDefaultSecurity(http)
+                .authenticationManager(authenticationManager)
                 .build();
     }
+
 
     private ServerHttpSecurity buildDefaultSecurity(ServerHttpSecurity httpSecurity) {
         return httpSecurity.csrf(ServerHttpSecurity.CsrfSpec::disable)

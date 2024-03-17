@@ -49,7 +49,7 @@ public class UserService {
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPassword(encoder.encode(userDto.getPassword()));
-        user.toAuthority(roleType);
+        user.addRole(roleType);
 
         log.info("User with id: {} was created via service at" + " time: " + LocalDateTime.now(), userDto.getId());
 
