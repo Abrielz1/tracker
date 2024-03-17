@@ -91,6 +91,7 @@ public class TaskService {
         log.info("Task with id: {} was created via service at" + " time: " + LocalDateTime.now(),
                 taskDto.getId());
         taskDto.setCreatedAt(Instant.now());
+
         return repository.save(objectMapper.convertValue(taskDto, Task.class));
     }
 
@@ -117,6 +118,7 @@ public class TaskService {
             if (taskDto.getObserverIds() != null) {
                 taskForUpdate.setObserverIds(taskDto.getObserverIds());
             }
+
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
     }
@@ -126,6 +128,7 @@ public class TaskService {
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
         Mono<User> userMono = userRepository.findById(observerId);
+
         return getById(id).flatMap(taskForUpdate -> {
             if (StringUtils.hasText(observerId) && taskForUpdate.getObserverIds().size() == 0) {
                 Set<User> set = new HashSet<>();
@@ -136,6 +139,7 @@ public class TaskService {
                 taskForUpdate.getObservers().add(userMono.block());
                 taskForUpdate.setUpdatedAt(Instant.now());
             }
+
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
     }
@@ -147,17 +151,22 @@ public class TaskService {
     }
 
     private Flux<List<User>> userAssignee() {
+
         Flux<Task> tasks = repository.findAll();
+
         Flux<List<User>> userObObserver = tasks.flatMap(user -> {
             Set<Mono<User>> monoset = new HashSet<>();
+
             for (String observerId : user.getObserverIds()) {
                 monoset.add(userRepository.findById(observerId));
             }
 
             Flux merged = Flux.empty();
+
             for (Mono out : monoset) {
                 merged = merged.mergeWith(out);
             }
+
             return merged.collectList();
         });
 
