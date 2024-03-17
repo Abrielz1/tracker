@@ -21,8 +21,8 @@ public class AppUserPrinciple implements UserDetails  {
         return user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .toList();
-
     }
+
     @Override
     public String getPassword() {
         return user.getPassword();

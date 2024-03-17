@@ -1,6 +1,7 @@
 package com.example.tracker.model;
 
 import com.example.tracker.enums.RoleType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,23 +26,30 @@ public class User {
 
     @Id@
     Indexed
-    @Column(name = "id")
+   // @Column(name = "id")
     private String id;
 
     @NotBlank
-    @Column(unique = true, name = "username")
+    @Indexed(unique = true, name = "username")
+    @Field("username")
+  //  @Column(unique = true, name = "username")
     private String username;
 
     @Email
     @NotBlank
-    @Column(unique = true, name = "email")
+ //@Column(unique = true, name = "email")
+    @Indexed(unique = true, name = "email")
+    @Field("email")
     private String email;
 
     @NotBlank
-    @Column(name = "password")
+ //   @Column(name = "password")
+    @Indexed(unique = false, name = "password")
+    @Field("password")
     private String password;
 
     @Field("roles")
+    @JsonIgnore
     @EqualsAndHashCode.Exclude
     List<RoleType> roles = new ArrayList<>();
 
