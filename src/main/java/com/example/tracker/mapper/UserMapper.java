@@ -6,6 +6,7 @@ import com.example.tracker.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -13,7 +14,9 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface UserMapper {
 
-    User userNewDtoToUser(UserNewDto request);
+    UserMapper USER_MAPPER = Mappers.getMapper(UserMapper.class);
+
+    User userNewDtoToUser(User request);
 
     UserDto userToUserDto(User user);
 }
