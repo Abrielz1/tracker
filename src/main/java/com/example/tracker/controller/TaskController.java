@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,7 +41,6 @@ public class TaskController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Flux<TaskDto> getAll() {
 
         log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
@@ -51,7 +49,6 @@ public class TaskController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Mono<TaskDto> getById(@PathVariable String id) {
 
         log.info("Task with id: {} was sent via controller at" + " time: " + LocalDateTime.now(), id);
@@ -60,7 +57,6 @@ public class TaskController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('MANAGER')")
     public Mono<Task> create(@Validated(Create.class) @RequestBody TaskDto taskDto,
                              @AuthenticationPrincipal AppUserPrinciple principle) {
 
@@ -70,7 +66,6 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('MANAGER')")
     public Mono<Task> update(@PathVariable String id,
                              @AuthenticationPrincipal AppUserPrinciple principle,
                              @Validated(Update.class) @RequestBody TaskDto taskDto) {
@@ -82,7 +77,6 @@ public class TaskController {
 
     @PutMapping("/addObserver/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Mono<Task> addObserver(@PathVariable String id,
                                   @RequestParam(name = "observerId") String observerId) {
         log.info("Task with id: {} and with observerId: {}" +
@@ -92,7 +86,6 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('MANAGER')")
     public Mono<Void> removeById(@PathVariable String id) {
 
         log.info("Task with id: {} was removed via controller at" + " time: " + LocalDateTime.now(), id);
@@ -100,7 +93,6 @@ public class TaskController {
     }
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @PreAuthorize("hasRole('MANAGER')")
     public Flux<ServerSentEvent<TaskDto>> getTaskUpdatesStream() {
 
         log.info("Task were sent via controller by stream");

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +34,6 @@ public class UserController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Flux<UserDto> getAll() {
 
         log.info("list of users were sent from controller" + " time: " + LocalDateTime.now());
@@ -44,7 +42,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Mono<UserDto> getById(@PathVariable String id) {
 
         log.info("User was sent from controller at" + " time: " + LocalDateTime.now());
@@ -54,7 +51,6 @@ public class UserController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Mono<UserDto> update(@PathVariable String id, @Validated(Update.class) @RequestBody UserNewDto userDto) {
 
         log.info("User with id: {} was updated via controller at" + " time: " + LocalDateTime.now(), id);
@@ -64,7 +60,6 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('USER') or ('MANAGER')")
     public Mono<Void> removeById(@PathVariable String id) {
 
         log.info("user with id: {} was removed via controller at" + " time: " + LocalDateTime.now(), id);

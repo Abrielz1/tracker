@@ -34,7 +34,6 @@ public class AuthController {
 
     private final ObjectMapper objectMapper;
 
-
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<User> create(@Validated(Create.class) @RequestBody UserNewDto userDto,
