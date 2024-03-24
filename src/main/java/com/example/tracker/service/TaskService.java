@@ -97,11 +97,11 @@ public class TaskService {
         return Mono.just(objectMapper.convertValue(taskDto, TaskDto.class));
     }
 
-    public Mono<Task> update(String id, String userId, TaskDto taskDto) {
+    public Mono<TaskDto> update(String id, String userId, TaskDto taskDto) {
 
         log.info("Task with id: {} and with userId: {}" +
                 " was updated via service at" + " time: " + LocalDateTime.now(), id, userId);
-        return getById(id).flatMap(taskForUpdate -> {
+        Mono<Task> task =  getById(id).flatMap(taskForUpdate -> {
 
             if (StringUtils.hasText(taskDto.getName())) {
                 taskForUpdate.setName(taskDto.getName());
@@ -123,15 +123,17 @@ public class TaskService {
 
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
+
+        return Mono.just(objectMapper.convertValue(task, TaskDto.class));
     }
 
-    public Mono<Task> addObserver(String id, String observerId) {
+    public Mono<TaskDto> addObserver(String id, String observerId) {
 
         log.info("Task with id: {} and with assigneeId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
         Mono<User> userMono = userRepository.findById(observerId);
 
-        return getById(id).flatMap(taskForUpdate -> {
+        Mono<Task> task = getById(id).flatMap(taskForUpdate -> {
             if (StringUtils.hasText(observerId) && taskForUpdate.getObserverIds().size() == 0) {
                 Set<User> set = new HashSet<>();
                 set.add(objectMapper.convertValue(userMono, User.class));
@@ -144,6 +146,8 @@ public class TaskService {
 
             return repository.save(objectMapper.convertValue(taskForUpdate, Task.class));
         });
+
+        return Mono.just(objectMapper.convertValue(task, TaskDto.class));
     }
 
     public Mono<Void> removeById(String id) {

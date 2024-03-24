@@ -4,7 +4,6 @@ import com.example.tracker.Create;
 import com.example.tracker.Update;
 import com.example.tracker.security.AppUserPrinciple;
 import com.example.tracker.dto.TaskDto;
-import com.example.tracker.model.Task;
 import com.example.tracker.publisher.TaskUpdatesPublisher;
 import com.example.tracker.service.TaskService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +59,7 @@ public class TaskController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Task> create(@Validated(Create.class) @RequestBody TaskDto taskDto,
+    public Mono<TaskDto> create(@Validated(Create.class) @RequestBody TaskDto taskDto,
                              @AuthenticationPrincipal AppUserPrinciple principle) {
 
         log.info("Task was created and id: {} was st via controller at" + " time: " + LocalDateTime.now(), taskDto.getId());
@@ -69,7 +68,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Task> update(@PathVariable String id,
+    public Mono<TaskDto> update(@PathVariable String id,
                              @AuthenticationPrincipal AppUserPrinciple principle,
                              @Validated(Update.class) @RequestBody TaskDto taskDto) {
 
@@ -80,12 +79,12 @@ public class TaskController {
 
     @PutMapping("/addObserver/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Task> addObserver(@PathVariable String id,
+    public Mono<TaskDto> addObserver(@PathVariable String id,
                                   @RequestParam(name = "observerId") String observerId) {
         log.info("Task with id: {} and with observerId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
-        Mono<Task> taskDtoMono = service.addObserver(id, observerId);
-        return service.addObserver(id, observerId);
+
+        return Mono.just(mapper.convertValue(service.addObserver(id, observerId), TaskDto.class));
     }
 
     @DeleteMapping("/{id}")
