@@ -84,7 +84,7 @@ public class TaskService {
                 ));
     }
 
-    public Mono<Task> create(TaskDto taskDto, AppUserPrinciple principle) {
+    public Mono<TaskDto> create(TaskDto taskDto, AppUserPrinciple principle) {
 
         taskDto.setAuthorId(principle.getId());
         taskDto.setId(UUID.randomUUID().toString());
@@ -92,7 +92,9 @@ public class TaskService {
                 taskDto.getId());
         taskDto.setCreatedAt(Instant.now());
 
-        return repository.save(objectMapper.convertValue(taskDto, Task.class));
+       Mono<Task> taskMono = repository.save(objectMapper.convertValue(taskDto, Task.class));
+
+        return Mono.just(objectMapper.convertValue(taskDto, TaskDto.class));
     }
 
     public Mono<Task> update(String id, String userId, TaskDto taskDto) {

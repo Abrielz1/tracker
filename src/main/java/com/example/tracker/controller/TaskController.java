@@ -7,6 +7,7 @@ import com.example.tracker.dto.TaskDto;
 import com.example.tracker.model.Task;
 import com.example.tracker.publisher.TaskUpdatesPublisher;
 import com.example.tracker.service.TaskService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,8 @@ public class TaskController {
     private final TaskService service;
 
     private final TaskUpdatesPublisher publisher;
+
+    private final ObjectMapper mapper;
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
@@ -81,6 +84,7 @@ public class TaskController {
                                   @RequestParam(name = "observerId") String observerId) {
         log.info("Task with id: {} and with observerId: {}" +
                 " was updated via controller at" + " time: " + LocalDateTime.now(), id, observerId);
+        Mono<Task> taskDtoMono = service.addObserver(id, observerId);
         return service.addObserver(id, observerId);
     }
 
