@@ -5,6 +5,7 @@ import com.example.tracker.model.Task;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -13,6 +14,8 @@ import org.mapstruct.ReportingPolicy;
 )
 
 public interface TaskMapper {
+
+    TaskMapper TASK_MAPPER = Mappers.getMapper(TaskMapper.class);
 
     Task taskDtotoTask(TaskDto taskDto);
 

@@ -2,6 +2,8 @@ package com.example.tracker.controller;
 
 import com.example.tracker.Create;
 import com.example.tracker.Update;
+import com.example.tracker.mapper.TaskMapper;
+import com.example.tracker.model.Task;
 import com.example.tracker.security.AppUserPrinciple;
 import com.example.tracker.dto.TaskDto;
 import com.example.tracker.publisher.TaskUpdatesPublisher;
@@ -28,6 +30,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
+import static com.example.tracker.mapper.TaskMapper.TASK_MAPPER;
+
 @Slf4j
 @RestController
 @Validated
@@ -46,7 +50,8 @@ public class TaskController {
     public Flux<TaskDto> getAll() {
 
         log.info("List os Tasks was sent via controller at" + " time: " + LocalDateTime.now());
-        return service.getAll();
+        return service.getAll().map(TASK_MAPPER::taskToTaskDto);
+
     }
 
     @GetMapping("/{id}")
@@ -59,7 +64,7 @@ public class TaskController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<TaskDto> create(@Validated(Create.class) @RequestBody TaskDto taskDto,
+    public Mono<Task> create(@Validated(Create.class) @RequestBody TaskDto taskDto,
                              @AuthenticationPrincipal AppUserPrinciple principle) {
 
         log.info("Task was created and id: {} was st via controller at" + " time: " + LocalDateTime.now(), taskDto.getId());
@@ -68,7 +73,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<TaskDto> update(@PathVariable String id,
+    public Mono<Task> update(@PathVariable String id,
                              @AuthenticationPrincipal AppUserPrinciple principle,
                              @Validated(Update.class) @RequestBody TaskDto taskDto) {
 
