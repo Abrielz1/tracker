@@ -2,6 +2,7 @@ package com.example.tracker.service;
 
 import com.example.tracker.dto.TaskDto;
 import com.example.tracker.dto.UserDto;
+import com.example.tracker.mapper.UserMapper;
 import com.example.tracker.model.Task;
 import com.example.tracker.model.User;
 import com.example.tracker.repository.TaskRepository;
@@ -78,8 +79,10 @@ public class TaskService {
                         tuple.getT1().getAuthorId(),
                         tuple.getT1().getAssigneeId(),
                         tuple.getT1().getObserverIds(),
-                        objectMapper.convertValue(tuple.getT2(), UserDto.class),
-                        objectMapper.convertValue(tuple.getT3(), UserDto.class),
+//                        objectMapper.convertValue(tuple.getT2(), UserDto.class),
+//                        objectMapper.convertValue(tuple.getT3(), UserDto.class),
+                        UserMapper.USER_MAPPER.userToUserDto(tuple.getT2()),
+                        UserMapper.USER_MAPPER.userToUserDto(tuple.getT3()),
                         new HashSet<>(userList)
                 ));
     }
