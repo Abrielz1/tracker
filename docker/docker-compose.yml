@@ -1,8 +1,8 @@
-version: '3'
+version: '3.8'
 
 services:
   mongodb:
-    image: mongo
+    image: mongo:6.0.8
     ports:
       - "27017:27017"
     environment:
