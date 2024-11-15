@@ -23,7 +23,9 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive:3.2.1")
+	implementation("org.apache.commons:commons-lang3:3.14.0")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
+	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("jakarta.persistence:jakarta.persistence-api:3.2.0-M1")
 	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0-M1")
 	implementation("jakarta.validation:jakarta.validation-api:3.1.0-M1")
